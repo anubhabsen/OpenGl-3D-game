@@ -1,7 +1,13 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <map>
 #include <vector>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <ctime>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -29,6 +35,32 @@ struct GLMatrices {
     glm::mat4 view;
     GLuint MatrixID;
 } Matrices;
+
+struct COLOR {
+    float r;
+    float g;
+    float b;
+};
+
+typedef struct COLOR color;
+COLOR red = {0.882, 0.3333, 0.3333};
+COLOR green = {0.1255, 0.75, 0.333};
+COLOR black = {0, 0, 0};
+COLOR steel = {196 / 255.0, 231 / 255.0, 249 / 255.0};
+
+struct Sprite {
+    string name;
+    int exists;
+    COLOR color;
+    float x, y;
+    float height, width, depth, angle;
+    VAO* object;
+};
+
+typedef struct Sprite Sprite;
+
+map <string, Sprite> cube;
+map <string, Sprite> tile;
 
 GLuint programID;
 int proj_type;
@@ -442,6 +474,21 @@ void createRectangle (string name, float x, float y, float width, float height, 
 
     // create3DObject creates and returns a handle to a VAO that can be used later
     rectangle = create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, color_buffer_data, GL_FILL);
+    Sprite elem = {};
+    elem.exists = 1;
+    elem.name = name;
+    elem.object = rectangle;
+    elem.x = x;
+    elem.y = y;
+    elem.height = height;
+    elem.width = width;
+    elem.depth = depth;
+    elem.angle = angle;
+
+    if(type == "cube")
+    {
+        cube[name]  = elem;
+    }
 }
 
 float camera_rotation_angle = 90;
@@ -500,19 +547,47 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
 
     // Pop matrix to undo transformations till last push matrix instead of recomputing model matrix
     // glPopMatrix ();
-    Matrices.model = glm::mat4(1.0f);
+    // Matrices.model = glm::mat4(1.0f);
 
-    glm::mat4 translateRectangle = glm::translate (rect_pos);        // glTranslatef
-    glm::mat4 rotateRectangle = glm::rotate((float)(rectangle_rotation*M_PI/180.0f), glm::vec3(0,0,1)); // rotate about vector (-1,1,1)
-    Matrices.model *= (translateRectangle * rotateRectangle);
-    MVP = VP * Matrices.model;
-    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    // glm::mat4 translateRectangle = glm::translate (rect_pos);        // glTranslatef
+    // glm::mat4 rotateRectangle = glm::rotate((float)(rectangle_rotation*M_PI/180.0f), glm::vec3(0,0,1)); // rotate about vector (-1,1,1)
+    // Matrices.model *= (translateRectangle * rotateRectangle);
+    // MVP = VP * Matrices.model;
+    // glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-    // draw3DObject draws the VAO given to it using current MVP matrix
-    draw3DObject(rectangle);
+    // // draw3DObject draws the VAO given to it using current MVP matrix
+    // draw3DObject(rectangle);
 
     // Increment angles
     float increments = 1;
+
+    for(map<string,Sprite>::iterator it=cube.begin(); it!=cube.end(); it++)
+    {
+      string current = it->first; //The name of the current object
+      if(cube[current].exists == 0)
+      {
+          continue;
+      }
+      glm::mat4 MVP;    // MVP = Projection * View * Model
+
+
+      Matrices.model = glm::mat4(1.0f);
+
+      /* Render your scene */
+      glm::mat4 ObjectTransform;
+      glm::mat4 translateObject = glm::translate (glm::vec3(cube[current].x, cube[current].y, 0.0f)); // glTranslatef
+      glm::mat4 rotateTriangle = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+
+      ObjectTransform=translateObject*rotateTriangle;
+      Matrices.model *= ObjectTransform;
+      MVP = VP * Matrices.model; // MVP = p * V * M
+
+      glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+      draw3DObject(cube[current].object);
+
+      //glPopMatrix ();
+    }
 
     //camera_rotation_angle++; // Simulating camera rotation
     //  triangle_rotation = triangle_rotation + increments*triangle_rot_dir*triangle_rot_status;
