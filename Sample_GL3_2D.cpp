@@ -60,7 +60,7 @@ struct Sprite {
     int exists;
     COLOR color;
     float x, y, z;
-    float height, width, depth, angle, anglex;
+    float height, width, depth, angle, anglex, angley;
     VAO* object;
 };
 
@@ -311,6 +311,7 @@ void keyboardChar (GLFWwindow* window, unsigned int key)
 		break;
     case 'w':
         movefar = true;
+        cout<<cube["maincube"].angle<<endl;
 		break;
     case 's':
 		movenear = true;
@@ -532,6 +533,7 @@ void createRectangle (string name, float x, float y, float z, float width, float
     elem.depth = depth;
     elem.angle = angle;
     elem.anglex = 0;
+    elem.angley = 0;
 
     if(type == "cube")
     {
@@ -611,6 +613,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
       string current = it->first; //The name of the current object
       cube[current].angle = (int)cube[current].angle % 360;
       cube[current].anglex = (int)cube[current].anglex % 360;
+      cube[current].angley = (int)cube[current].angley % 360;
       if(vertical == 0)
       {
         cube[current].y = -0.45;
@@ -625,70 +628,170 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
       }
       if(moveleft == true)
       {
-            cube[current].x -= 0.75 / 10;
-            cube[current].angle += 9;
-            if((int)cube[current].angle % 90 == 0)
+            if(abs(cube[current].anglex) == 90 || abs(cube[current].anglex) == 270)
             {
-                if(vertical == 1)
+                cube[current].x -= 0.5 / 10;
+                cube[current].angle += 9;
+                if((int)cube[current].angle % 90 == 0)
                 {
+                    cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
                     vertical = 0;
                 }
-                else if(vertical == 0 && (int)cube[current].angle % 90 == 0)
-                {
-                    vertical = 1;
-                }
                 moveleft = false;
+            }
+            else
+            {
+                cube[current].x -= 0.75 / 10;
+                cube[current].angle += 9;
+                if((int)cube[current].angle % 90 == 0)
+                {
+                    if(vertical == 1)
+                    {
+                        vertical = 0;
+                    }
+                    else if(vertical == 0 && (int)cube[current].angle % 90 == 0)
+                    {
+                        vertical = 1;
+                    }
+                    moveleft = false;
+                    cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
+                }
             }
       }
       else if(moveright == true)
       {
-            cube[current].x += 0.75 / 10;
-            cube[current].angle -= 9;
-            if((int)cube[current].angle % 90 == 0)
+            if(abs(cube[current].anglex) == 90 || abs(cube[current].anglex) == 270)
             {
-                if(vertical == 1)
+                cube[current].x += 0.5 / 10;
+                cube[current].angle -= 9;
+                if((int)cube[current].angle % 90 == 0)
                 {
                     vertical = 0;
+                    moveright = false;
+                    cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
                 }
-                else if(vertical == 0 && (int)cube[current].angle % 90 == 0)
+            }
+            else
+            {
+                cube[current].x += 0.75 / 10;
+                cube[current].angle -= 9;
+                if((int)cube[current].angle % 90 == 0)
                 {
-                    vertical = 1;
+                    if(vertical == 1)
+                    {
+                        vertical = 0;
+                    }
+                    else if(vertical == 0 && (int)cube[current].angle % 90 == 0)
+                    {
+                        vertical = 1;
+                    }
+                    moveright = false;
+                    cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
                 }
-                moveright = false;
             }
       }
       else if (movefar == true)
       {
-            cube[current].z -= 0.75 / 10;
-            cube[current].anglex += 9;
-            if((int)cube[current].anglex % 90 == 0)
+            if(abs(cube[current].angle) == 90 || abs(cube[current].angle) == 270)
             {
-                if(vertical == 1)
+                cube[current].z -= 0.5 / 10;
+                cube[current].angley += 9;
+                if((int)cube[current].angley % 90 == 0)
                 {
-                    vertical = 0;
+                    movefar = false;
+                    cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
                 }
-                else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+            }
+            else
+            {
+                if(cube[current].angle == 0)
                 {
-                    vertical = 1;
+                    cube[current].z -= 0.75 / 10;
+                    cube[current].anglex -= 9;
+                    if((int)cube[current].anglex % 90 == 0)
+                    {
+                        if(vertical == 1)
+                        {
+                            vertical = 0;
+                        }
+                        else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+                        {
+                            vertical = 1;
+                        }
+                        movefar = false;
+                        cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
+                    }
                 }
-                movefar = false;
+                else
+                {
+                    cube[current].z -= 0.75 / 10;
+                    cube[current].anglex += 9;
+                    if((int)cube[current].anglex % 90 == 0)
+                    {
+                        if(vertical == 1)
+                        {
+                            vertical = 0;
+                        }
+                        else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+                        {
+                            vertical = 1;
+                        }
+                        movefar = false;
+                        cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
+                    }
+                }
             }
       }
       else if (movenear == true)
       {
-            cube[current].z += 0.75 / 10;
-            cube[current].anglex -= 9;
-            if((int)cube[current].anglex % 90 == 0)
+            if(abs(cube[current].angle) == 90 || abs(cube[current].angle) == 270)
             {
-                if(vertical == 1)
+                cube[current].z += 0.5 / 10;
+                cube[current].angley -= 9;
+                if((int)cube[current].angley % 90 == 0)
                 {
-                    vertical = 0;
+                    movenear = false;
+                    cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
                 }
-                else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+            }
+            else
+            {
+                if(cube[current].angle == 0)
                 {
-                    vertical = 1;
+                    cube[current].z += 0.75 / 10;
+                    cube[current].anglex += 9;
+                    if((int)cube[current].anglex % 90 == 0)
+                    {
+                        if(vertical == 1)
+                        {
+                            vertical = 0;
+                        }
+                        else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+                        {
+                            vertical = 1;
+                        }
+                        movenear = false;
+                        cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
+                    }
                 }
-                movenear = false;
+                else
+                {
+                    cube[current].z += 0.75 / 10;
+                    cube[current].anglex -= 9;
+                    if((int)cube[current].anglex % 90 == 0)
+                    {
+                        if(vertical == 1)
+                        {
+                            vertical = 0;
+                        }
+                        else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+                        {
+                            vertical = 1;
+                        }
+                        movenear = false;
+                        cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
+                    }
+                }
             }
       }
       for(map<string,Sprite>::iterator it1=tile.begin(); it1!=tile.end(); it1++)
