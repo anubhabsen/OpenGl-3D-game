@@ -636,8 +636,8 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
                 {
                     cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
                     vertical = 0;
+                    moveleft = false;
                 }
-                moveleft = false;
             }
             else
             {
@@ -652,8 +652,8 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
                     else if(vertical == 0 && (int)cube[current].angle % 90 == 0)
                     {
                         vertical = 1;
+                        moveleft = false;
                     }
-                    moveleft = false;
                     cout<<cube[current].anglex<<" "<<cube[current].angley<<" "<<cube[current].angle<<endl;
                 }
             }
@@ -695,7 +695,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
             if(abs(cube[current].angle) == 90 || abs(cube[current].angle) == 270)
             {
                 cube[current].z -= 0.5 / 10;
-                cube[current].angley += 9;
+                cube[current].angley -= 9;
                 if((int)cube[current].angley % 90 == 0)
                 {
                     movefar = false;
@@ -747,7 +747,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
             if(abs(cube[current].angle) == 90 || abs(cube[current].angle) == 270)
             {
                 cube[current].z += 0.5 / 10;
-                cube[current].angley -= 9;
+                cube[current].angley += 9;
                 if((int)cube[current].angley % 90 == 0)
                 {
                     movenear = false;
@@ -860,8 +860,9 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
       glm::mat4 translateObject = glm::translate (glm::vec3(cube[current].x, cube[current].y, cube[current].z)); // glTranslatef
       glm::mat4 rotateTriangle = glm::rotate((float)((cube[current].angle)*M_PI/180.0f), glm::vec3(0,0,1));  // rotate about vector (1,0,0)
       glm::mat4 rotateTriangle1 = glm::rotate((float)((cube[current].anglex)*M_PI/180.0f), glm::vec3(1,0,0));  // rotate about vector (1,0,0)
+      glm::mat4 rotateTriangle2 = glm::rotate((float)((cube[current].angley)*M_PI/180.0f), glm::vec3(0,1,0));
 
-      ObjectTransform=translateObject*rotateTriangle*rotateTriangle1;
+      ObjectTransform=translateObject*rotateTriangle*rotateTriangle1*rotateTriangle2;
       Matrices.model *= ObjectTransform;
       MVP = VP * Matrices.model; // MVP = p * V * M
 
