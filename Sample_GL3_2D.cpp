@@ -60,7 +60,7 @@ struct Sprite {
     int exists;
     COLOR color;
     float x, y, z;
-    float height, width, depth, angle;
+    float height, width, depth, angle, anglex;
     VAO* object;
 };
 
@@ -78,6 +78,7 @@ float goalx = 2, goalz = 0;
 float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
 bool vertical = true;
+bool moveleft = false, moveright = false, movefar = false, movenear = false;
 
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path) {
@@ -252,7 +253,7 @@ void draw3DObject (struct VAO* vao)
 
 /* Executed when a regular key is pressed/released/held-down */
 /* Prefered for Keyboard events */
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera_zoom += yoffset/10;
 }
@@ -290,42 +291,38 @@ void keyboardChar (GLFWwindow* window, unsigned int key)
 {
     switch (key) {
     case 'o':
-    camera_rotation_angle += 5;
-    break;
+	    camera_rotation_angle += 5;
+	    break;
     case 'p':
-    camera_rotation_angle -= 5;
-    break;
+	    camera_rotation_angle -= 5;
+	    break;
     case 'Q':
     case 'q':
-	quit(window);
-	break;
+		quit(window);
+		break;
     case ' ':
-	proj_type ^= 1;
-	break;
+		proj_type ^= 1;
+		break;
     case 'a':
-	cube["maincube"].x -= 0.5;
-    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
-	break;
+        moveleft = true;
+		break;
     case 'd':
-	cube["maincube"].x += 0.5;
-    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
-	break;
+        moveright = true;
+		break;
     case 'w':
-	cube["maincube"].z -= 0.5;
-    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
-	break;
+        movefar = true;
+		break;
     case 's':
-	cube["maincube"].z += 0.5;
-    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
-	break;
+		movenear = true;
+		break;
     case 'f':
-	cube["maincube"].y += 0.5;
-	break;
+		cube["maincube"].y += 0.5;
+		break;
     case 'r':
-	cube["maincube"].y -= 0.5;
-	break;
+		cube["maincube"].y -= 0.5;
+		break;
     default:
-	break;
+		break;
     }
 }
 
@@ -534,6 +531,7 @@ void createRectangle (string name, float x, float y, float z, float width, float
     elem.width = width;
     elem.depth = depth;
     elem.angle = angle;
+    elem.anglex = 0;
 
     if(type == "cube")
     {
@@ -611,24 +609,102 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
     {
       int flag = 0;
       string current = it->first; //The name of the current object
+      cube[current].angle = (int)cube[current].angle % 360;
+      cube[current].anglex = (int)cube[current].anglex % 360;
+      if(vertical == 0)
+      {
+        cube[current].y = -0.45;
+      }
+      else
+      {
+        cube[current].y = -0.15;
+      }
       if(cube[current].exists == 0)
       {
           continue;
       }
-
+      if(moveleft == true)
+      {
+            cube[current].x -= 0.75 / 10;
+            cube[current].angle += 9;
+            if((int)cube[current].angle % 90 == 0)
+            {
+                if(vertical == 1)
+                {
+                    vertical = 0;
+                }
+                else if(vertical == 0 && (int)cube[current].angle % 90 == 0)
+                {
+                    vertical = 1;
+                }
+                moveleft = false;
+            }
+      }
+      else if(moveright == true)
+      {
+            cube[current].x += 0.75 / 10;
+            cube[current].angle -= 9;
+            if((int)cube[current].angle % 90 == 0)
+            {
+                if(vertical == 1)
+                {
+                    vertical = 0;
+                }
+                else if(vertical == 0 && (int)cube[current].angle % 90 == 0)
+                {
+                    vertical = 1;
+                }
+                moveright = false;
+            }
+      }
+      else if (movefar == true)
+      {
+            cube[current].z -= 0.75 / 10;
+            cube[current].anglex += 9;
+            if((int)cube[current].anglex % 90 == 0)
+            {
+                if(vertical == 1)
+                {
+                    vertical = 0;
+                }
+                else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+                {
+                    vertical = 1;
+                }
+                movefar = false;
+            }
+      }
+      else if (movenear == true)
+      {
+            cube[current].z += 0.75 / 10;
+            cube[current].anglex -= 9;
+            if((int)cube[current].anglex % 90 == 0)
+            {
+                if(vertical == 1)
+                {
+                    vertical = 0;
+                }
+                else if(vertical == 0 && (int)cube[current].anglex % 90 == 0)
+                {
+                    vertical = 1;
+                }
+                movenear = false;
+            }
+      }
       for(map<string,Sprite>::iterator it1=tile.begin(); it1!=tile.end(); it1++)
       {
           string curr = it1->first; //The name of the current object
-          if(vertical && tile[curr].x == cube[current].x && tile[curr].z == cube[current].z)
+          if(abs(tile[curr].x - cube[current].x) < 0.26 && abs(tile[curr].z - cube[current].z) < 0.26)
           {
             flag = 1;
+            break;
           }
       }
 
       for(map<string,Sprite>::iterator it1=fragtile.begin(); it1!=fragtile.end(); it1++)
       {
           string curr = it1->first; //The name of the current object
-          if(vertical && fragtile[curr].x == cube[current].x && fragtile[curr].z == cube[current].z)
+          if(abs(fragtile[curr].x - cube[current].x) < 0.26 && abs(fragtile[curr].z - cube[current].z) < 0.26)
           {
             cout << "GAME OVER" << endl;
             quit(window);
@@ -638,7 +714,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
       for(map<string,Sprite>::iterator it1=toggle.begin(); it1!=toggle.end(); it1++)
       {
           string curr = it1->first; //The name of the current object
-          if(toggle[curr].x == cube[current].x && toggle[curr].z == cube[current].z)
+          if(abs(toggle[curr].x - cube[current].x) < 0.26 && abs(toggle[curr].z - cube[current].z) < 0.26)
           {
               flag = 1;
               if(bridge[curr].exists == 0)
@@ -679,9 +755,10 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
       /* Render your scene */
       glm::mat4 ObjectTransform;
       glm::mat4 translateObject = glm::translate (glm::vec3(cube[current].x, cube[current].y, cube[current].z)); // glTranslatef
-      glm::mat4 rotateTriangle = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+      glm::mat4 rotateTriangle = glm::rotate((float)((cube[current].angle)*M_PI/180.0f), glm::vec3(0,0,1));  // rotate about vector (1,0,0)
+      glm::mat4 rotateTriangle1 = glm::rotate((float)((cube[current].anglex)*M_PI/180.0f), glm::vec3(1,0,0));  // rotate about vector (1,0,0)
 
-      ObjectTransform=translateObject*rotateTriangle;
+      ObjectTransform=translateObject*rotateTriangle*rotateTriangle1;
       Matrices.model *= ObjectTransform;
       MVP = VP * Matrices.model; // MVP = p * V * M
 
@@ -840,7 +917,7 @@ GLFWwindow* initGLFW (int width, int height){
     glfwSetKeyCallback(window, keyboard);      // general keyboard input
     glfwSetCharCallback(window, keyboardChar);  // simpler specific character handling
     glfwSetMouseButtonCallback(window, mouseButton);  // mouse button clicks
-    glfwSetScrollCallback(window, scroll_callback); 
+    glfwSetScrollCallback(window, scroll_callback);
 
     return window;
 }
