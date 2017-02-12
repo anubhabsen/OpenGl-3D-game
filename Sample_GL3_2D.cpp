@@ -47,12 +47,14 @@ COLOR red = {0.882, 0.3333, 0.3333};
 COLOR green = {0.1255, 0.75, 0.333};
 COLOR black = {0, 0, 0};
 COLOR steel = {196 / 255.0, 231 / 255.0, 249 / 255.0};
+COLOR yellow = {1, 1, 0};
+COLOR blue = {0, 0, 1};
 
 struct Sprite {
     string name;
     int exists;
     COLOR color;
-    float x, y;
+    float x, y, z;
     float height, width, depth, angle;
     VAO* object;
 };
@@ -64,7 +66,9 @@ map <string, Sprite> tile;
 
 GLuint programID;
 int proj_type;
-glm::vec3 tri_pos, rect_pos;
+float goalx = 0, goalz = 0;
+float camera_zoom = 0.7;
+float camera_rotation_angle = 90;
 
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path) {
@@ -235,13 +239,15 @@ void draw3DObject (struct VAO* vao)
  * Customizable functions *
  **************************/
 
-float triangle_rot_dir = 1;
-float rectangle_rot_dir = 1;
-bool triangle_rot_status = true;
-bool rectangle_rot_status = true;
+
 
 /* Executed when a regular key is pressed/released/held-down */
 /* Prefered for Keyboard events */
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera_zoom += yoffset/10;
+}
+
 void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     // Function is called first on GLFW_PRESS.
@@ -249,10 +255,8 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
     if (action == GLFW_RELEASE) {
         switch (key) {
 	case GLFW_KEY_C:
-	    rectangle_rot_status = !rectangle_rot_status;
 	    break;
 	case GLFW_KEY_P:
-	    triangle_rot_status = !triangle_rot_status;
 	    break;
 	case GLFW_KEY_X:
 	    // do something ..
@@ -276,49 +280,37 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 void keyboardChar (GLFWwindow* window, unsigned int key)
 {
     switch (key) {
+    case 'o':
+        camera_rotation_angle += 5;
+        break;
+    case 'p':
+        camera_rotation_angle -= 5;
+        break;
     case 'Q':
     case 'q':
-	quit(window);
+    	quit(window);
 	break;
     case ' ':
-	proj_type ^= 1;
-	break;
+    	proj_type ^= 1;
+    	break;
     case 'a':
-	tri_pos.x -= 0.2;
-	break;
+    	cube["maincube"].x -= 0.5;
+    	break;
     case 'd':
-	tri_pos.x += 0.2;
-	break;
+    	cube["maincube"].x += 0.5;
+    	break;
     case 'w':
-	tri_pos.y += 0.2;
-	break;
+    	cube["maincube"].z -= 0.5;
+    	break;
     case 's':
-	tri_pos.y -= 0.2;
-	break;
+    	cube["maincube"].z += 0.5;
+    	break;
     case 'f':
-	tri_pos.z += 0.2;
-	break;
+    	cube["maincube"].y += 0.5;
+    	break;
     case 'r':
-	tri_pos.z -= 0.2;
-	break;
-    case 'j':
-	rect_pos.x -= 0.2;
-	break;
-    case 'l':
-	rect_pos.x += 0.2;
-	break;
-    case 'i':
-	rect_pos.y += 0.2;
-	break;
-    case 'k':
-	rect_pos.y -= 0.2;
-	break;
-    case 'y':
-	rect_pos.z -= 0.2;
-	break;
-    case 'h':
-	rect_pos.z += 0.2;
-	break;
+    	cube["maincube"].y -= 0.5;
+    	break;
     default:
 	break;
     }
@@ -327,18 +319,16 @@ void keyboardChar (GLFWwindow* window, unsigned int key)
 /* Executed when a mouse button is pressed/released */
 void mouseButton (GLFWwindow* window, int button, int action, int mods)
 {
-    switch (button) {
+    switch (button)
+    {
     case GLFW_MOUSE_BUTTON_LEFT:
-	if (action == GLFW_RELEASE)
-	    triangle_rot_dir *= -1;
-	break;
+        if(action == GLFW_RELEASE)
+            break;
     case GLFW_MOUSE_BUTTON_RIGHT:
-	if (action == GLFW_RELEASE) {
-	    rectangle_rot_dir *= -1;
-	}
-	break;
+        if(action == GLFW_RELEASE)
+        break;
     default:
-	break;
+        break;
     }
 }
 
@@ -388,13 +378,13 @@ void createTriangle ()
 }
 
 // Creates the rectangle object used in this sample code
-void createRectangle (string name, float x, float y, float width, float height, float depth, string type,float angle)
+void createRectangle (string name, float x, float y, float z, float width, float height, float depth, string type, float angle, COLOR mycolor)
 {
     float w = width / 2;
     float h = height / 2;
     float d = depth / 2;
     // GL3 accepts only Triangles. Quads are not supported
-    static const GLfloat vertex_buffer_data[] = {
+    GLfloat vertex_buffer_data[] = {
         -w,-h,-d, // triangle 1 : begin
         -w,-h, d,
         -w, h, d, // triangle 1 : end
@@ -433,53 +423,100 @@ void createRectangle (string name, float x, float y, float width, float height, 
         w,-h, d
     };
 
-    static const GLfloat color_buffer_data [] = {
-	0.583f,  0.771f,  0.014f,
-    0.609f,  0.115f,  0.436f,
-    0.327f,  0.483f,  0.844f,
-    0.822f,  0.569f,  0.201f,
-    0.435f,  0.602f,  0.223f,
-    0.310f,  0.747f,  0.185f,
-    0.597f,  0.770f,  0.761f,
-    0.559f,  0.436f,  0.730f,
-    0.359f,  0.583f,  0.152f,
-    0.483f,  0.596f,  0.789f,
-    0.559f,  0.861f,  0.639f,
-    0.195f,  0.548f,  0.859f,
-    0.014f,  0.184f,  0.576f,
-    0.771f,  0.328f,  0.970f,
-    0.406f,  0.615f,  0.116f,
-    0.676f,  0.977f,  0.133f,
-    0.971f,  0.572f,  0.833f,
-    0.140f,  0.616f,  0.489f,
-    0.997f,  0.513f,  0.064f,
-    0.945f,  0.719f,  0.592f,
-    0.543f,  0.021f,  0.978f,
-    0.279f,  0.317f,  0.505f,
-    0.167f,  0.620f,  0.077f,
-    0.347f,  0.857f,  0.137f,
-    0.055f,  0.953f,  0.042f,
-    0.714f,  0.505f,  0.345f,
-    0.783f,  0.290f,  0.734f,
-    0.722f,  0.645f,  0.174f,
-    0.302f,  0.455f,  0.848f,
-    0.225f,  0.587f,  0.040f,
-    0.517f,  0.713f,  0.338f,
-    0.053f,  0.959f,  0.120f,
-    0.393f,  0.621f,  0.362f,
-    0.673f,  0.211f,  0.457f,
-    0.820f,  0.883f,  0.371f,
-    0.982f,  0.099f,  0.879f
+    if (type == "cube")
+    {
+        GLfloat color_buffer_data[] =
+            {
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b, // color 2
+                blue.r, blue.g, blue.b, // color 1
+                yellow.r, yellow.g, yellow.b // color 2
+            };
+        rectangle = create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, color_buffer_data, GL_FILL);
+    }
+    else
+    {
+        GLfloat color_buffer_data [] = {
+        mycolor.r, mycolor.g, mycolor.b, // color 1
+        mycolor.r, mycolor.g, mycolor.b, // color 2
+        mycolor.r, mycolor.g, mycolor.b, // color 3
+        mycolor.r, mycolor.g, mycolor.b, // color 4
+        mycolor.r, mycolor.g, mycolor.b, // color 5
+        mycolor.r, mycolor.g, mycolor.b, // color 6
+        mycolor.r, mycolor.g, mycolor.b, // color 1
+        mycolor.r, mycolor.g, mycolor.b, // color 2
+        mycolor.r, mycolor.g, mycolor.b, // color 3
+        mycolor.r, mycolor.g, mycolor.b, // color 4
+        mycolor.r, mycolor.g, mycolor.b, // color 5
+        mycolor.r, mycolor.g, mycolor.b, // color 6
+        mycolor.r, mycolor.g, mycolor.b, // color 1
+        mycolor.r, mycolor.g, mycolor.b, // color 2
+        mycolor.r, mycolor.g, mycolor.b, // color 3
+        mycolor.r, mycolor.g, mycolor.b, // color 4
+        mycolor.r, mycolor.g, mycolor.b, // color 5
+        mycolor.r, mycolor.g, mycolor.b, // color 6
+        mycolor.r, mycolor.g, mycolor.b, // color 1
+        mycolor.r, mycolor.g, mycolor.b, // color 2
+        mycolor.r, mycolor.g, mycolor.b, // color 3
+        mycolor.r, mycolor.g, mycolor.b, // color 4
+        mycolor.r, mycolor.g, mycolor.b, // color 5
+        mycolor.r, mycolor.g, mycolor.b, // color 6
+        mycolor.r, mycolor.g, mycolor.b, // color 1
+        mycolor.r, mycolor.g, mycolor.b, // color 2
+        mycolor.r, mycolor.g, mycolor.b, // color 3
+        mycolor.r, mycolor.g, mycolor.b, // color 4
+        mycolor.r, mycolor.g, mycolor.b, // color 5
+        mycolor.r, mycolor.g, mycolor.b, // color 6
+        mycolor.r, mycolor.g, mycolor.b, // color 1
+        mycolor.r, mycolor.g, mycolor.b, // color 2
+        mycolor.r, mycolor.g, mycolor.b, // color 3
+        mycolor.r, mycolor.g, mycolor.b, // color 4
+        mycolor.r, mycolor.g, mycolor.b, // color 5
+        mycolor.r, mycolor.g, mycolor.b // color 6
     };
+        rectangle = create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, color_buffer_data, GL_FILL);
+    }
 
     // create3DObject creates and returns a handle to a VAO that can be used later
-    rectangle = create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, color_buffer_data, GL_FILL);
     Sprite elem = {};
     elem.exists = 1;
     elem.name = name;
     elem.object = rectangle;
     elem.x = x;
     elem.y = y;
+    elem.z = z;
     elem.height = height;
     elem.width = width;
     elem.depth = depth;
@@ -487,13 +524,13 @@ void createRectangle (string name, float x, float y, float width, float height, 
 
     if(type == "cube")
     {
-        cube[name]  = elem;
+        cube[name] = elem;
+    }
+    else if(type == "tile")
+    {
+        tile[name] = elem;
     }
 }
-
-float camera_rotation_angle = 90;
-float rectangle_rotation = 0;
-float triangle_rotation = 0;
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -509,7 +546,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
     glUseProgram(programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
+    glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 2, 5*sin(camera_rotation_angle*M_PI/180.0f) );
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target (0, 0, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
@@ -522,28 +559,11 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
 
     // Compute ViewProject matrix as view/camera might not be changed for this frame (basic scenario)
     //  Don't change unless you are sure!!
-    glm::mat4 VP = (proj_type?Matrices.projectionP:Matrices.projectionO) * Matrices.view;
+    glm::mat4 VP = (proj_type?Matrices.projectionP:Matrices.projectionO) * Matrices.view * glm::scale(glm::vec3(exp(camera_zoom)));
 
     // Send our transformation to the currently bound shader, in the "MVP" uniform
     // For each model you render, since the MVP will be different (at least the M part)
     //  Don't change unless you are sure!!
-    glm::mat4 MVP;	// MVP = Projection * View * Model
-
-    // Load identity to model matrix
-    Matrices.model = glm::mat4(1.0f);
-
-    /* Render your scene */
-    glm::mat4 translateTriangle = glm::translate (tri_pos); // glTranslatef
-    glm::mat4 rotateTriangle = glm::rotate((float)(triangle_rotation*M_PI/180.0f), glm::vec3(0,0,1));  // rotate about vector (1,0,0)
-    glm::mat4 triangleTransform = translateTriangle * rotateTriangle;
-    Matrices.model *= triangleTransform;
-    MVP = VP * Matrices.model; // MVP = p * V * M
-
-    //  Don't change unless you are sure!!
-    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-    // draw3DObject draws the VAO given to it using current MVP matrix
-    // draw3DObject(triangle);
 
     // Pop matrix to undo transformations till last push matrix instead of recomputing model matrix
     // glPopMatrix ();
@@ -559,12 +579,60 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
     // draw3DObject(rectangle);
 
     // Increment angles
-    float increments = 1;
+    // float increments = 1;
 
-    for(map<string,Sprite>::iterator it=cube.begin(); it!=cube.end(); it++)
+    for(map<string,Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
     {
+      int flag = 0;
       string current = it->first; //The name of the current object
       if(cube[current].exists == 0)
+      {
+          continue;
+      }
+
+      for(map<string,Sprite>::iterator it1=tile.begin(); it1!=tile.end(); it1++)
+      {
+          string tile_current = it1->first; //The name of the current object
+          if(tile[tile_current].x == cube[current].x && tile[tile_current].z == cube[current].z)
+          {
+              flag = 1;
+          }
+      }
+      if(cube[current].x == goalx && cube[current].z == goalz)
+      {
+          cout<<"You've won"<<endl;
+          exit(0);
+      }
+      if(flag == 0)
+      {
+          cout<<"GAME OVER"<<endl;
+          exit(0);
+      }
+
+      glm::mat4 MVP;    // MVP = Projection * View * Model
+
+      Matrices.model = glm::mat4(1.0f);
+
+      /* Render your scene */
+      glm::mat4 ObjectTransform;
+      glm::mat4 translateObject = glm::translate (glm::vec3(cube[current].x, cube[current].y, cube[current].z)); // glTranslatef
+      glm::mat4 rotateTriangle = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+
+      ObjectTransform=translateObject*rotateTriangle;
+      Matrices.model *= ObjectTransform;
+      MVP = VP * Matrices.model; // MVP = p * V * M
+
+      glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+      draw3DObject(cube[current].object);
+
+      //glPopMatrix ();
+    }
+
+    for(map<string,Sprite>::iterator it=tile.begin(); it!=tile.end(); it++)
+    {
+      string current = it->first; //The name of the current object
+      if(tile[current].exists == 0)
       {
           continue;
       }
@@ -575,7 +643,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
 
       /* Render your scene */
       glm::mat4 ObjectTransform;
-      glm::mat4 translateObject = glm::translate (glm::vec3(cube[current].x, cube[current].y, 0.0f)); // glTranslatef
+      glm::mat4 translateObject = glm::translate (glm::vec3(tile[current].x, tile[current].y, tile[current].z)); // glTranslatef
       glm::mat4 rotateTriangle = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
 
       ObjectTransform=translateObject*rotateTriangle;
@@ -584,7 +652,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
 
       glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-      draw3DObject(cube[current].object);
+      draw3DObject(tile[current].object);
 
       //glPopMatrix ();
     }
@@ -625,6 +693,7 @@ GLFWwindow* initGLFW (int width, int height){
     glfwSetKeyCallback(window, keyboard);      // general keyboard input
     glfwSetCharCallback(window, keyboardChar);  // simpler specific character handling
     glfwSetMouseButtonCallback(window, mouseButton);  // mouse button clicks
+    glfwSetScrollCallback(window, scroll_callback);
 
     return window;
 }
@@ -636,7 +705,23 @@ void initGL (GLFWwindow* window, int width, int height)
     /* Objects should be created before any other gl function and shaders */
     // Create the models
     // createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
-    createRectangle ("maincube", 0, 0, 0.5, 1, 0.5, "cube", 0);
+
+    createRectangle("maincube", 0.5, -0.15, 0, 0.5, 1, 0.5, "cube", 0, green);
+    createRectangle("t(0.5,0)", 0.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1,0)", 1, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(1.5,0)", 1.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1,0.5)", 1, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1,-0.5)", 1, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(0,0.5)", 0, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(-0.5,0)", -0.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(0.5,0.5)", 0.5, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(-0.5,0.5)", -0.5, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0.5,-0.5)", 0.5, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(-0.5,-0.5)", -0.5, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0,-0.5)", 0, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(-1,0)", -1, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0,1)", 0, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0,-1)", 0, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, red);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders( "Sample_GL.vert", "Sample_GL.frag" );
@@ -663,9 +748,7 @@ int main (int argc, char** argv)
 {
     int width = 600;
     int height = 600;
-    proj_type = 0;
-    tri_pos = glm::vec3(0, 0, 0);
-    rect_pos = glm::vec3(0, 0, 0);
+    proj_type = 1;
 
     GLFWwindow* window = initGLFW(width, height);
     initGL (window, width, height);
