@@ -47,7 +47,12 @@ COLOR red = {0.882, 0.3333, 0.3333};
 COLOR green = {0.1255, 0.75, 0.333};
 COLOR black = {0, 0, 0};
 COLOR steel = {196 / 255.0, 231 / 255.0, 249 / 255.0};
-COLOR yellow = {1, 1, 0};
+COLOR yellow = {244/255.0, 203/255.0, 66/255.0};
+COLOR coolblue = {66/255.0, 229/255.0, 244/255.0};
+COLOR coolgreen = {0/255.0, 153/255.0, 51/255.0};
+COLOR grey = {166/255.0, 166/255.0, 166/255.0};
+COLOR teal = {0, 153/255.0, 153/255.0};
+
 COLOR blue = {0, 0, 1};
 
 struct Sprite {
@@ -63,12 +68,16 @@ typedef struct Sprite Sprite;
 
 map <string, Sprite> cube;
 map <string, Sprite> tile;
+map <string, Sprite> fragtile;
+map <string, Sprite> bridge;
+map <string, Sprite> toggle;
 
 GLuint programID;
 int proj_type;
-float goalx = 0, goalz = 0;
-float camera_zoom = 0.7;
+float goalx = 2, goalz = 0;
+float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
+bool vertical = true;
 
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path) {
@@ -243,7 +252,7 @@ void draw3DObject (struct VAO* vao)
 
 /* Executed when a regular key is pressed/released/held-down */
 /* Prefered for Keyboard events */
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) 
 {
     camera_zoom += yoffset/10;
 }
@@ -281,36 +290,40 @@ void keyboardChar (GLFWwindow* window, unsigned int key)
 {
     switch (key) {
     case 'o':
-        camera_rotation_angle += 5;
-        break;
+    camera_rotation_angle += 5;
+    break;
     case 'p':
-        camera_rotation_angle -= 5;
-        break;
+    camera_rotation_angle -= 5;
+    break;
     case 'Q':
     case 'q':
-    	quit(window);
+	quit(window);
 	break;
     case ' ':
-    	proj_type ^= 1;
-    	break;
+	proj_type ^= 1;
+	break;
     case 'a':
-    	cube["maincube"].x -= 0.5;
-    	break;
+	cube["maincube"].x -= 0.5;
+    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
+	break;
     case 'd':
-    	cube["maincube"].x += 0.5;
-    	break;
+	cube["maincube"].x += 0.5;
+    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
+	break;
     case 'w':
-    	cube["maincube"].z -= 0.5;
-    	break;
+	cube["maincube"].z -= 0.5;
+    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
+	break;
     case 's':
-    	cube["maincube"].z += 0.5;
-    	break;
+	cube["maincube"].z += 0.5;
+    cout << cube["maincube"].x << "--" << cube["maincube"].z << endl;
+	break;
     case 'f':
-    	cube["maincube"].y += 0.5;
-    	break;
+	cube["maincube"].y += 0.5;
+	break;
     case 'r':
-    	cube["maincube"].y -= 0.5;
-    	break;
+	cube["maincube"].y -= 0.5;
+	break;
     default:
 	break;
     }
@@ -428,41 +441,41 @@ void createRectangle (string name, float x, float y, float z, float width, float
         GLfloat color_buffer_data[] =
             {
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b, // color 2
+                coolblue.r, coolblue.g, coolblue.b, // color 2
                 blue.r, blue.g, blue.b, // color 1
-                yellow.r, yellow.g, yellow.b // color 2
+                coolblue.r, coolblue.g, coolblue.b // color 2
             };
         rectangle = create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, color_buffer_data, GL_FILL);
     }
@@ -530,6 +543,19 @@ void createRectangle (string name, float x, float y, float z, float width, float
     {
         tile[name] = elem;
     }
+    else if(type == "bridge")
+    {
+        elem.exists = 0;
+        bridge[name] = elem;
+    }
+    else if(type == "toggle")
+    {
+        toggle[name] = elem;
+    }
+    else if(type == "fragtile")
+    {
+        fragtile[name] = elem;
+    }
 }
 
 /* Render the scene with openGL */
@@ -581,7 +607,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
     // Increment angles
     // float increments = 1;
 
-    for(map<string,Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
+    for(map<string,Sprite>::iterator it=cube.begin(); it!=cube.end(); it++)
     {
       int flag = 0;
       string current = it->first; //The name of the current object
@@ -592,12 +618,49 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
 
       for(map<string,Sprite>::iterator it1=tile.begin(); it1!=tile.end(); it1++)
       {
-          string tile_current = it1->first; //The name of the current object
-          if(tile[tile_current].x == cube[current].x && tile[tile_current].z == cube[current].z)
+          string curr = it1->first; //The name of the current object
+          if(vertical && tile[curr].x == cube[current].x && tile[curr].z == cube[current].z)
+          {
+            flag = 1;
+          }
+      }
+
+      for(map<string,Sprite>::iterator it1=fragtile.begin(); it1!=fragtile.end(); it1++)
+      {
+          string curr = it1->first; //The name of the current object
+          if(vertical && fragtile[curr].x == cube[current].x && fragtile[curr].z == cube[current].z)
+          {
+            cout << "GAME OVER" << endl;
+            quit(window);
+          }
+      }
+
+      for(map<string,Sprite>::iterator it1=toggle.begin(); it1!=toggle.end(); it1++)
+      {
+          string curr = it1->first; //The name of the current object
+          if(toggle[curr].x == cube[current].x && toggle[curr].z == cube[current].z)
+          {
+              flag = 1;
+              if(bridge[curr].exists == 0)
+                toggle[curr].y -= 0.1;
+              bridge[curr].exists = 1;
+          }
+      }
+
+      for(map<string,Sprite>::iterator it2=bridge.begin(); it2!=bridge.end(); it2++)
+      {
+          string curr = it2->first; //The name of the current object
+          float w = cube[current].width;
+          float d = cube[current].depth;
+          if(bridge[curr].exists == 0)
+            continue;
+
+          if( ( bridge[curr].x == (cube[current].x - w/2) || bridge[curr].x == (cube[current].x + w/2) || bridge[curr].x == cube[current].x) && ( bridge[curr].z == (cube[current].z - d/2) || bridge[curr].z == (cube[current].z + d/2) || bridge[curr].z == cube[current].z))
           {
               flag = 1;
           }
       }
+
       if(cube[current].x == goalx && cube[current].z == goalz)
       {
           cout<<"You've won"<<endl;
@@ -605,7 +668,7 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
       }
       if(flag == 0)
       {
-          cout<<"GAME OVER"<<endl;
+          cout << "GAME OVER" << endl;
           exit(0);
       }
 
@@ -657,6 +720,90 @@ void draw (GLFWwindow* window, float x, float y, float w, float h)
       //glPopMatrix ();
     }
 
+    for(map<string,Sprite>::iterator it=fragtile.begin(); it!=fragtile.end(); it++)
+    {
+      string current = it->first; //The name of the current object
+      if(fragtile[current].exists == 0)
+      {
+          continue;
+      }
+      glm::mat4 MVP;    // MVP = Projection * View * Model
+
+
+      Matrices.model = glm::mat4(1.0f);
+
+      /* Render your scene */
+      glm::mat4 ObjectTransform;
+      glm::mat4 translateObject = glm::translate (glm::vec3(fragtile[current].x, fragtile[current].y, fragtile[current].z)); // glTranslatef
+      glm::mat4 rotateTriangle = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+
+      ObjectTransform=translateObject*rotateTriangle;
+      Matrices.model *= ObjectTransform;
+      MVP = VP * Matrices.model; // MVP = p * V * M
+
+      glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+      draw3DObject(fragtile[current].object);
+
+      //glPopMatrix ();
+    }
+
+    for(map<string,Sprite>::iterator it=toggle.begin(); it!=toggle.end(); it++)
+    {
+      string current = it->first; //The name of the current object
+      if(toggle[current].exists == 0)
+      {
+          continue;
+      }
+      glm::mat4 MVP;    // MVP = Projection * View * Model
+
+
+      Matrices.model = glm::mat4(1.0f);
+
+      /* Render your scene */
+      glm::mat4 ObjectTransform;
+      glm::mat4 translateObject = glm::translate (glm::vec3(toggle[current].x, toggle[current].y, toggle[current].z)); // glTranslatef
+      glm::mat4 rotateTriangle = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+
+      ObjectTransform=translateObject*rotateTriangle;
+      Matrices.model *= ObjectTransform;
+      MVP = VP * Matrices.model; // MVP = p * V * M
+
+      glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+      draw3DObject(toggle[current].object);
+
+      //glPopMatrix ();
+    }
+
+    for(map<string,Sprite>::iterator it=bridge.begin(); it!=bridge.end(); it++)
+    {
+      string current = it->first; //The name of the current object
+      if(bridge[current].exists == 0)
+      {
+          continue;
+      }
+      glm::mat4 MVP;    // MVP = Projection * View * Model
+
+
+      Matrices.model = glm::mat4(1.0f);
+
+      /* Render your scene */
+      glm::mat4 ObjectTransform;
+      glm::mat4 translateObject = glm::translate (glm::vec3(bridge[current].x, bridge[current].y, bridge[current].z)); // glTranslatef
+      glm::mat4 rotateTriangle = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+
+      ObjectTransform=translateObject*rotateTriangle;
+      Matrices.model *= ObjectTransform;
+      MVP = VP * Matrices.model; // MVP = p * V * M
+
+      glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+      draw3DObject(bridge[current].object);
+
+      //glPopMatrix ();
+    }
+
     //camera_rotation_angle++; // Simulating camera rotation
     //  triangle_rotation = triangle_rotation + increments*triangle_rot_dir*triangle_rot_status;
     //  rectangle_rotation = rectangle_rotation + increments*rectangle_rot_dir*rectangle_rot_status;
@@ -693,7 +840,7 @@ GLFWwindow* initGLFW (int width, int height){
     glfwSetKeyCallback(window, keyboard);      // general keyboard input
     glfwSetCharCallback(window, keyboardChar);  // simpler specific character handling
     glfwSetMouseButtonCallback(window, mouseButton);  // mouse button clicks
-    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetScrollCallback(window, scroll_callback); 
 
     return window;
 }
@@ -706,22 +853,47 @@ void initGL (GLFWwindow* window, int width, int height)
     // Create the models
     // createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
 
-    createRectangle("maincube", 0.5, -0.15, 0, 0.5, 1, 0.5, "cube", 0, green);
-    createRectangle("t(0.5,0)", 0.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
-    createRectangle("t(1,0)", 1, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
-    createRectangle("t(1.5,0)", 1.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
-    createRectangle("t(1,0.5)", 1, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
-    createRectangle("t(1,-0.5)", 1, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
-    createRectangle("t(0,0.5)", 0, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
-    createRectangle("t(-0.5,0)", -0.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
-    createRectangle("t(0.5,0.5)", 0.5, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, red);
-    createRectangle("t(-0.5,0.5)", -0.5, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, red);
-    createRectangle("t(0.5,-0.5)", 0.5, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
-    createRectangle("t(-0.5,-0.5)", -0.5, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
-    createRectangle("t(0,-0.5)", 0, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
-    createRectangle("t(-1,0)", -1, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
-    createRectangle("t(0,1)", 0, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, red);
-    createRectangle("t(0,-1)", 0, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("maincube", -3.5, -0.15, 0, 0.5, 1, 0.5, "cube", 0, green);
+
+    createRectangle("t(0.5,0)", 0.5+2, -0.7, 0, 0.5, 0.1, 0.5, "fragtile", 0, teal);
+    createRectangle("t(1,0)", 1+2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("ttt(1,0.5)", 1, -0.7, 0.5, 0.5, 0.1, 0.5, "fragtile", 0, teal);
+    createRectangle("ttt(1,-0.5)", 1, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1.5,0)", 1.5+2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1,0.5)", 1+2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1,-0.5)", 1+2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(0,0.5)", 2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(-0.5,0)", -0.5+2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(0.5,0.5)", 0.5+2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(-0.5,0.5)", -0.5+2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0.5,-0.5)", 0.5+2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(-0.5,-0.5)", -0.5+2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0,-0.5)", 0+2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(-1,0)", -1+2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0,1)", 0+2, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(0,-1)", 0+2, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, red);
+
+    createRectangle("tt(0.5,0)", 0.5+-2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("tt1,0)", 1+-2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("tt1.5,0)", 1.5+-2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("tt1,0.5)", 1+-2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("tt1,-0.5)", 1+-2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("tt0,0.5)", -2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("tt-0.5,0)", -0.5+-2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("tt-0.5,0.5)", -0.5+-2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("tt0.5,-0.5)", 0.5+-2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("tt-0.5,-0.5)", -0.5+-2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("tt0,-0.5)", 0+-2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("tt-1,0)", -1+-2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("tt0,1)", 0+-2, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("tt0,-1)", 0+-2, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(-2,0)", -2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, red);
+    createRectangle("t(-3.5,0)", -3.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+
+    createRectangle("s1", -1.5, -0.7, -0.5, 0.4, 0.4, 0.4, "toggle", 0, grey);
+    createRectangle("s1", 0.25, -0.7, 0, 1, 0.1, 0.5, "bridge", 0, yellow);
+
+    createRectangle("tt0.5,0.5)", 0.5+-2, -0.7, 0.5, 0.5, 0.1, 0.5, "fragtile", 0, teal);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders( "Sample_GL.vert", "Sample_GL.frag" );
