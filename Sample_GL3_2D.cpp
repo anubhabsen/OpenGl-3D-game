@@ -583,7 +583,7 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
     glUseProgram(programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye(5 * cos(camera_rotation_angle * M_PI / 180.0f), 2, 5 * sin(camera_rotation_angle * M_PI / 180.0f));
+    glm::vec3 eye(5 * cos(camera_rotation_angle * M_PI / 180.0f), 4, 5 * sin(camera_rotation_angle * M_PI / 180.0f));
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target(0, 0, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
