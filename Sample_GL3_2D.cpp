@@ -85,9 +85,10 @@ float goalx = 2, goalz = 0;
 float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
 
-int vis = 0;
+int vis = 0, blockview = 0, defview = 1;
 int standing_bit = 1, move_left = 0, move_right = 0, move_up = 0, move_down = 0,sleeping_x = 0, sleeping_z = 0, move_clock = 0, move_anti = 0;
 int next_left = 90, next_right = -90, next_up = 90, next_down =-90, hor_count = 0, ver_count = 0, next_clock = 90, next_anti = -90,rot_count = 0;
+float cameraxdef = 5, cameraydef = 4, camerazdef = 5, camerax = cameraxdef, cameray = cameraydef, cameraz = camerazdef;
 
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
@@ -331,7 +332,33 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
         move_down = 1;
         break;
     case 'f':
-        cube["maincube"].y += 0.5;
+        if(camerax == cameraxdef && cameray == cameraydef && cameraz == camerazdef)
+        {
+            if(standing_bit == 1)
+            {
+                camerax = cube["maincube"].x;
+                cameray = cube["maincube"].y + 0.5;
+                cameraz = cube["maincube"].z;
+            }
+            else
+            {
+                camerax = cube["maincube"].x;
+                cameray = cube["maincube"].y + 0.25;
+                cameraz = cube["maincube"].z;
+            }
+            blockview = 1;
+            defview = 0;
+            camera_rotation_angle = 0;
+        }
+        else
+        {
+            camerax = cameraxdef;
+            cameray = cameraydef;
+            cameraz = camerazdef;
+            blockview = 0;
+            defview = 1;
+            camera_rotation_angle = 90;
+        }
         break;
     case 'r':
         cube["maincube"].y -= 0.5;
@@ -583,7 +610,7 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
     glUseProgram(programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye(5 * cos(camera_rotation_angle * M_PI / 180.0f), 4, 5 * sin(camera_rotation_angle * M_PI / 180.0f));
+    glm::vec3 eye(camerax * cos(camera_rotation_angle * M_PI / 180.0f), cameray, cameraz * sin(camera_rotation_angle * M_PI / 180.0f));
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target(0, 0, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
@@ -619,6 +646,27 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
     // Increment angles
     // float increments = 1;
 
+    if(blockview == 1)
+    {
+        if(standing_bit == 1)
+        {
+            camerax = cube["maincube"].x;
+            cameray = cube["maincube"].y + 0.5;
+            cameraz = cube["maincube"].z;
+        }
+        else
+        {
+            camerax = cube["maincube"].x;
+            cameray = cube["maincube"].y + 0.25;
+            cameraz = cube["maincube"].z;
+        }
+    }
+    else if(defview == 1)
+    {
+        camerax = cameraxdef;
+        cameray = cameraydef;
+        cameraz = camerazdef;
+    }
     for (map<string, Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
     {
         int flag = 0;
