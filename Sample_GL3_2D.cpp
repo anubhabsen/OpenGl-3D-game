@@ -85,11 +85,11 @@ float goalx = 2, goalz = 0;
 float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
 
-int vis = 0, blockview = 0, defview = 1;
+int vis = 0, blockview = 0, defview = 1, topview = 0;
 int standing_bit = 1, move_left = 0, move_right = 0, move_up = 0, move_down = 0,sleeping_x = 0, sleeping_z = 0, move_clock = 0, move_anti = 0;
 int next_left = 90, next_right = -90, next_up = 90, next_down =-90, hor_count = 0, ver_count = 0, next_clock = 90, next_anti = -90,rot_count = 0;
 float cameraxdef = 5, cameraydef = 4, camerazdef = 5, camerax = cameraxdef, cameray = cameraydef, cameraz = camerazdef;
-
+float targetx = 0, targety = 0, targetz = 0;
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
 {
@@ -349,6 +349,9 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
             blockview = 1;
             defview = 0;
             camera_rotation_angle = 0;
+            targetx = 0;
+            targety = 0;
+            targetz = 0;
         }
         else
         {
@@ -358,10 +361,34 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
             blockview = 0;
             defview = 1;
             camera_rotation_angle = 90;
+            targetx = 0;
+            targety = 0;
+            targetz = 0;
         }
         break;
     case 'r':
-        cube["maincube"].y -= 0.5;
+        if(camerax == cameraxdef && cameray == cameraydef && cameraz == camerazdef)
+        {
+            camerax = 0;
+            cameray = 6;
+            cameraz = 0;
+            topview = 1;
+            defview = 0;
+            targetx = 1;
+            targety = -0.5;
+        }
+        else
+        {
+            camerax = cameraxdef;
+            cameray = cameraydef;
+            cameraz = camerazdef;
+            topview = 0;
+            defview = 1;
+            camera_rotation_angle = 90;
+            targetx = 0;
+            targety = 0;
+            targetz = 0;
+        }
         break;
     default:
         break;
@@ -612,7 +639,7 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
     // Eye - Location of camera. Don't change unless you are sure!!
     glm::vec3 eye(camerax * cos(camera_rotation_angle * M_PI / 180.0f), cameray, cameraz * sin(camera_rotation_angle * M_PI / 180.0f));
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
-    glm::vec3 target(0, 0, 0);
+    glm::vec3 target(targetx, targety, targetz);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up(0, 1, 0);
 
@@ -660,12 +687,26 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             cameray = cube["maincube"].y + 0.25;
             cameraz = cube["maincube"].z;
         }
+        targetx = 0;
+        targety = 0;
+        targetz = 0;
     }
     else if(defview == 1)
     {
         camerax = cameraxdef;
         cameray = cameraydef;
         cameraz = camerazdef;
+        targetx = 0;
+        targety = 0;
+        targetz = 0;
+    }
+    else if(topview == 1)
+    {
+        camerax = 0;
+        cameray = 6;
+        cameraz = 0;
+        targetx = 1;
+        targety = -0.5;
     }
     for (map<string, Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
     {
