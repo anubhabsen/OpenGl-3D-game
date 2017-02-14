@@ -310,9 +310,9 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
         if(blockview == 1)
         {
             blockangle += 5;
-            targetx = 1 * cos(blockangle * M_PI / 180);
+            targetx = 1 * cos(blockangle * M_PI / 180) + cube["maincube"].x;
             targety = 0;
-            targetz = 1 * sin(blockangle * M_PI / 180);
+            targetz = 1 * sin(blockangle * M_PI / 180) + cube["maincube"].z;
         }
         else
         {
@@ -323,9 +323,9 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
         if(blockview == 1)
         {
             blockangle -= 5;
-            targetx = 1 * cos(blockangle * M_PI / 180);
+            targetx = 1 * cos(blockangle * M_PI / 180) + cube["maincube"].x;
             targety = 0;
-            targetz = 1 * sin(blockangle * M_PI / 180);
+            targetz = 1 * sin(blockangle * M_PI / 180) + cube["maincube"].z;
         }
         else
         {
@@ -707,9 +707,9 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             cameray = cube["maincube"].y + 0.25;
             cameraz = cube["maincube"].z;
         }
-        targetx = 1 * cos(blockangle * M_PI / 180);
+        targetx = 1 * cos(blockangle * M_PI / 180) + cube["maincube"].x;
         targety = 0;
-        targetz = 1 * sin(blockangle * M_PI / 180);
+        targetz = 1 * sin(blockangle * M_PI / 180) + cube["maincube"].z;
     }
     else if(defview == 1)
     {
