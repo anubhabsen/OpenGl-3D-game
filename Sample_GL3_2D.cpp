@@ -85,7 +85,7 @@ float goalx = 2, goalz = 0;
 float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
 
-int vis = 0, blockview = 0, defview = 1, topview = 0, blockangle = 90;
+int vis = 0, blockview = 0, defview = 1, topview = 0, blockangle = 90, followview = 0;
 int standing_bit = 1, move_left = 0, move_right = 0, move_up = 0, move_down = 0,sleeping_x = 0, sleeping_z = 0, move_clock = 0, move_anti = 0;
 int next_left = 90, next_right = -90, next_up = 90, next_down =-90, hor_count = 0, ver_count = 0, next_clock = 90, next_anti = -90,rot_count = 0;
 float cameraxdef = 5, cameraydef = 4, camerazdef = 5, camerax = cameraxdef, cameray = cameraydef, cameraz = camerazdef;
@@ -410,6 +410,32 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
             targetz = 0;
         }
         break;
+    case 'b':
+        if(camerax == cameraxdef && cameray == cameraydef && cameraz == camerazdef)
+        {
+            camerax = cube["maincube"].x - 3;
+            cameray = 2;
+            cameraz = cube["maincube"].z;
+            targetx = cube["maincube"].x;
+            targetz = cube["maincube"].z;
+            targety = 1.7;
+            defview = 0;
+            followview = 1;
+            camera_rotation_angle = 0;
+        }
+        else
+        {
+            camerax = cameraxdef;
+            cameray = cameraydef;
+            cameraz = camerazdef;
+            followview = 0;
+            defview = 1;
+            camera_rotation_angle = 90;
+            targetx = 0;
+            targety = 0;
+            targetz = 0;
+        }
+        break;
     default:
         break;
     }
@@ -727,6 +753,16 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
         cameraz = 0;
         targetx = 1;
         targety = -0.5;
+    }
+    else if(followview == 1)
+    {
+        camerax = cube["maincube"].x - 3;
+        cameray = 2;
+        cameraz = cube["maincube"].z;
+        targetx = cube["maincube"].x;
+        targetz = cube["maincube"].z;
+        targety = 1.7;
+        camera_rotation_angle = 0;
     }
     for (map<string, Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
     {
