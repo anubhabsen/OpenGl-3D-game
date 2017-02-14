@@ -450,20 +450,24 @@ void mouseButton (GLFWwindow* window, int button, int action, int mods)
 {
 	switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
-			if (action == GLFW_PRESS){
+			if (action == GLFW_PRESS)
+            {
 				left_mouse_clicked=1;
 				break;
 			}
-			if (action == GLFW_RELEASE){
+			if (action == GLFW_RELEASE)
+            {
 				left_mouse_clicked=0;
 				break;
 			}
 		case GLFW_MOUSE_BUTTON_RIGHT:
-			if (action == GLFW_PRESS){
+			if (action == GLFW_PRESS)
+            {
 				right_mouse_clicked=1;
 				break;
 			}
-			if (action == GLFW_RELEASE){
+			if (action == GLFW_RELEASE)
+            {
 				right_mouse_clicked=0;
 				break;
 			}
@@ -808,20 +812,17 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
         targety = 1.7;
         camera_rotation_angle = 0;
     }
-    for (map<string, Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
+    for(map<string, Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
     {
         int flag = 0;
-        string current = it->first; //The name of the current object
-        if (cube[current].exists == 0)
+        string current = it->first;
+        if(cube[current].exists == 0)
         {
             continue;
         }
-
-        // cout << cube[current].z << endl;
-
-        if (move_left == 1 && cube[current].anglex < next_left && standing_bit == 1)
+        if(move_left == 1 && cube[current].anglex < next_left && standing_bit == 1)
         {
-            if (vis == 0)
+            if(vis == 0)
             {
                 hor_count--;
                 vis = 1;
@@ -829,7 +830,7 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             cube[current].y -= 0.025;
             cube[current].x -= 0.075;
             cube[current].anglex += 9;
-            if (cube[current].anglex == next_left)
+            if(cube[current].anglex == next_left)
             {
                 move_left = 0;
                 standing_bit = 0;
@@ -840,9 +841,9 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 vis = 0;
             }
         }
-        else if (move_left == 1 && cube[current].anglex < next_left && /*standing_bit == 0*/ sleeping_x == 1)
+        else if(move_left == 1 && cube[current].anglex < next_left && /*standing_bit == 0*/ sleeping_x == 1)
         {
-            if (vis == 0)
+            if(vis == 0)
             {
                 hor_count--;
                 vis = 1;
@@ -850,7 +851,7 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             cube[current].y += 0.025;
             cube[current].x -= 0.075;
             cube[current].anglex += 9;
-            if (cube[current].anglex == next_left)
+            if(cube[current].anglex == next_left)
             {
                 move_left = 0;
                 standing_bit = 1;
@@ -861,29 +862,16 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 vis = 0;
             }
         }
-        else if (move_left == 1 && cube[current].angle > next_anti && sleeping_z == 1)
+        else if(move_left == 1 && cube[current].angle > next_anti && sleeping_z == 1)
         {
-            if (vis == 0)
+            if(vis == 0)
             {
                 vis = 1;
                 rot_count--;
             }
             cube[current].x -= 0.05;
             cube[current].angle -= 9;
-            /*if(abs(rot_count)%4==2)
-            {
-                cube[current].angle +=18;
-                if(cube[current].angle == next_clock)
-                {
-                    move_left = 0;
-                    next_clock += 90;
-                    next_anti +=90;
-                    standing_bit = 0;
-                    sleeping_x = 0;
-                    sleeping_z = 1;
-                }
-            }*/
-            if (cube[current].angle == next_anti)
+            if(cube[current].angle == next_anti)
             {
                 move_left = 0;
                 next_clock -= 90;
@@ -893,9 +881,9 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 vis = 0;
             }
         }
-        else if (move_right == 1 && cube[current].anglex > next_right && standing_bit == 1)
+        else if(move_right == 1 && cube[current].anglex > next_right && standing_bit == 1)
         {
-            if (vis == 0)
+            if(vis == 0)
             {
                 hor_count++;
                 vis = 1;
@@ -903,7 +891,7 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             cube[current].y -= 0.025;
             cube[current].x += 0.075;
             cube[current].anglex -= 9;
-            if (cube[current].anglex == next_right)
+            if(cube[current].anglex == next_right)
             {
                 standing_bit = 0;
                 move_right = 0;
@@ -914,9 +902,9 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 vis = 0;
             }
         }
-        else if (move_right == 1 && cube[current].anglex > next_right && sleeping_x == 1)
+        else if(move_right == 1 && cube[current].anglex > next_right && sleeping_x == 1)
         {
-            if (vis == 0)
+            if(vis == 0)
             {
                 hor_count++;
                 vis = 1;
@@ -924,7 +912,7 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             cube[current].y += 0.025;
             cube[current].x += 0.075;
             cube[current].anglex -= 9;
-            if (cube[current].anglex == next_right)
+            if(cube[current].anglex == next_right)
             {
                 standing_bit = 1;
                 move_right = 0;
@@ -935,16 +923,16 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 vis = 0;
             }
         }
-        else if (move_right == 1 && cube[current].angle < next_clock && sleeping_z == 1)
+        else if(move_right == 1 && cube[current].angle < next_clock && sleeping_z == 1)
         {
-            if (vis == 0)
+            if(vis == 0)
             {
                 rot_count++;
                 vis = 1;
             }
             cube[current].x += 0.05;
             cube[current].angle += 9;
-            if (cube[current].angle == next_clock)
+            if(cube[current].angle == next_clock)
             {
                 move_right = 0;
                 next_clock += 90;
@@ -954,26 +942,11 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 vis = 0;
             }
         }
-        else if (move_up == 1 && cube[current].angley > next_down && standing_bit == 1)
+        else if(move_up == 1 && cube[current].angley > next_down && standing_bit == 1)
         {
             cube[current].z -= 0.075;
             cube[current].y -= 0.025;
-
             cube[current].angley -= 9;
-            // if (abs(hor_count) % 4 == 2)
-            // {
-            //     cube[current].angley += 18;
-            //     if (cube[current].angley == next_up)
-            //     {
-            //         move_up = 0;
-            //         next_up += 90;
-            //         next_down += 90;
-            //         standing_bit = 0;
-            //         sleeping_x = 0;
-            //         sleeping_z = 1;
-            //         vis = 0;
-            //     }
-            // }
             if (cube[current].angley == next_down)
             {
                 standing_bit = 0;
@@ -984,11 +957,10 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 next_down -= 90;
             }
         }
-        else if (move_up == 1 && cube[current].angley > next_down && sleeping_z == 1)
+        else if(move_up == 1 && cube[current].angley > next_down && sleeping_z == 1)
         {
             cube[current].z -= 0.075;
             cube[current].y += 0.025;
-            //cout << "LOL" << endl;
             cube[current].angley -= 9;
             // if (abs(hor_count) % 4 == 2)
             // {
