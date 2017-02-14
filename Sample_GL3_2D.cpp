@@ -713,27 +713,14 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
     glfwGetFramebufferSize(window, &fbwidth, &fbheight);
     glViewport((int)(x * fbwidth), (int)(y * fbheight), (int)(w * fbwidth), (int)(h * fbheight));
 
-    // double new_mouse_x, new_mouse_y;
-    // glfwGetCursorPos(window, &new_mouse_x, &new_mouse_y);
-    // if (left_mouse_clicked == 1)
-    // {
-    //     angle += (previous_mouse_x3 - new_mouse_x) / 10;
-    //     previous_mouse_x = new_mouse_x;
-    //     eye_x = -50 + 800 * cos(angle * M_PI / 180);
-    //     eye_z = -50 + 800 * sin(angle * M_PI / 180);
-    // }
-    // previous_mouse_x3 = new_mouse_x;
-    // if (right_mouse_clicked)
-    // {
-    //     if (abs(previous_mouse_y - new_mouse_y) >= 35)
-    //         previous_mouse_y = new_mouse_y;
-    //     else
-    //         eye_y += new_mouse_y - previous_mouse_y;
-    //     previous_mouse_y = new_mouse_y;
-    // }
-    // prev_mouse_x = new_mouse_x;
-    // prev_mouse_y = new_mouse_y;
-
+    double new_mouse_x, new_mouse_y;
+    glfwGetCursorPos(window, &new_mouse_x, &new_mouse_y);
+    if (left_mouse_clicked == 1)
+    {
+        camera_rotation_angle += (new_mouse_x * 360 / 600.0);
+        camerax = -1 * (-50 + 800 * cos(camera_rotation_angle * M_PI / 180));
+        cameraz = -1 * ( -50 + 800 * sin(camera_rotation_angle * M_PI / 180));
+    }
     // use the loaded shader program
     // Don't change unless you know what you are doing
     glUseProgram(programID);
