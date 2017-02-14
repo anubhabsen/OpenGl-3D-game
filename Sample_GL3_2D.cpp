@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include <ctime>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -58,7 +59,7 @@ COLOR coolblue = {66 / 255.0, 229 / 255.0, 244 / 255.0};
 COLOR coolgreen = {0 / 255.0, 153 / 255.0, 51 / 255.0};
 COLOR grey = {166 / 255.0, 166 / 255.0, 166 / 255.0};
 COLOR teal = {0, 153 / 255.0, 153 / 255.0};
-
+COLOR bg = {0.3f, 0.3f, 0.3f};
 COLOR blue = {0, 0, 1};
 
 struct Sprite
@@ -78,6 +79,7 @@ map<string, Sprite> tile;
 map<string, Sprite> fragtile;
 map<string, Sprite> bridge;
 map<string, Sprite> toggle;
+map<string, Sprite> teles;
 
 GLuint programID;
 int proj_type;
@@ -85,11 +87,16 @@ float goalx = 2, goalz = 0;
 float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
 
+int right_mouse_clicked = 0, left_mouse_clicked = 0;
+
 int vis = 0, blockview = 0, defview = 1, topview = 0, blockangle = 90, followview = 0;
 int standing_bit = 1, move_left = 0, move_right = 0, move_up = 0, move_down = 0,sleeping_x = 0, sleeping_z = 0, move_clock = 0, move_anti = 0;
 int next_left = 90, next_right = -90, next_up = 90, next_down =-90, hor_count = 0, ver_count = 0, next_clock = 90, next_anti = -90,rot_count = 0;
 float cameraxdef = 5, cameraydef = 4, camerazdef = 5, camerax = cameraxdef, cameray = cameraydef, cameraz = camerazdef;
 float targetx = 0, targety = 0, targetz = 0;
+
+int levelstate = 0;
+
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
 {
@@ -142,7 +149,7 @@ GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
     glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
     glCompileShader(FragmentShaderID);
 
-    // Check Fragment Shader
+    // Check Fragment ShadercreateRectangle("s1", -1.5, -0.7, -0.5, 0.4, 0.4, 0.4, "toggle", 0, grey);
     glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
     glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     std::vector<char> FragmentShaderErrorMessage(InfoLogLength);
@@ -442,19 +449,31 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
 }
 
 /* Executed when a mouse button is pressed/released */
-void mouseButton(GLFWwindow *window, int button, int action, int mods)
+void mouseButton (GLFWwindow* window, int button, int action, int mods)
 {
-    switch (button)
-    {
-    case GLFW_MOUSE_BUTTON_LEFT:
-        if (action == GLFW_RELEASE)
-            break;
-    case GLFW_MOUSE_BUTTON_RIGHT:
-        if (action == GLFW_RELEASE)
-            break;
-    default:
-        break;
-    }
+	switch (button) {
+		case GLFW_MOUSE_BUTTON_LEFT:
+			if (action == GLFW_PRESS){
+				left_mouse_clicked=1;
+				break;
+			}
+			if (action == GLFW_RELEASE){
+				left_mouse_clicked=0;
+				break;
+			}
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			if (action == GLFW_PRESS){
+				right_mouse_clicked=1;
+				break;
+			}
+			if (action == GLFW_RELEASE){
+				right_mouse_clicked=0;
+				break;
+			}
+			break;
+		default:
+			break;
+	}
 }
 
 /* Executed when window is resized to 'width' and 'height' */
@@ -668,15 +687,52 @@ void createRectangle(string name, float x, float y, float z, float width, float 
     {
         fragtile[name] = elem;
     }
+    else if(type == "teles")
+    {
+        teles[name] = elem;
+    }
 }
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
+void startnextlevel()
+{
+    cube["maincube"].x = -3.5;
+    cube["maincube"].y = -0.15;
+    cube["maincube"].z = 0;
+    toggle["s1"].exists = 0;
+    bridge["s1"].exists = 0;
+    bridge["s12"].exists = 0;
+
+    createRectangle("teleport", -1.5, -0.7, -0.5, 0.4, 2, 0.4, "teles", 0, red);
+}
+
 void draw(GLFWwindow *window, float x, float y, float w, float h)
 {
     int fbwidth, fbheight;
     glfwGetFramebufferSize(window, &fbwidth, &fbheight);
     glViewport((int)(x * fbwidth), (int)(y * fbheight), (int)(w * fbwidth), (int)(h * fbheight));
+
+    // double new_mouse_x, new_mouse_y;
+    // glfwGetCursorPos(window, &new_mouse_x, &new_mouse_y);
+    // if (left_mouse_clicked == 1)
+    // {
+    //     angle += (previous_mouse_x3 - new_mouse_x) / 10;
+    //     previous_mouse_x = new_mouse_x;
+    //     eye_x = -50 + 800 * cos(angle * M_PI / 180);
+    //     eye_z = -50 + 800 * sin(angle * M_PI / 180);
+    // }
+    // previous_mouse_x3 = new_mouse_x;
+    // if (right_mouse_clicked)
+    // {
+    //     if (abs(previous_mouse_y - new_mouse_y) >= 35)
+    //         previous_mouse_y = new_mouse_y;
+    //     else
+    //         eye_y += new_mouse_y - previous_mouse_y;
+    //     previous_mouse_y = new_mouse_y;
+    // }
+    // prev_mouse_x = new_mouse_x;
+    // prev_mouse_y = new_mouse_y;
 
     // use the loaded shader program
     // Don't change unless you know what you are doing
@@ -765,68 +821,68 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
         camera_rotation_angle = 0;
     }
     for (map<string, Sprite>::iterator it = cube.begin(); it != cube.end(); it++)
+    {
+        int flag = 0;
+        string current = it->first; //The name of the current object
+        if (cube[current].exists == 0)
         {
-            int flag = 0;
-            string current = it->first; //The name of the current object
-            if (cube[current].exists == 0)
-            {
-                continue;
-            }
+            continue;
+        }
 
-            // cout << cube[current].z << endl;
+        // cout << cube[current].z << endl;
 
-            if (move_left == 1 && cube[current].anglex < next_left && standing_bit == 1)
+        if (move_left == 1 && cube[current].anglex < next_left && standing_bit == 1)
+        {
+            if (vis == 0)
             {
-                if (vis == 0)
-                {
-                    hor_count--;
-                    vis = 1;
-                }
-                cube[current].y -= 0.025;
-                cube[current].x -= 0.075;
-                cube[current].anglex += 9;
-                if (cube[current].anglex == next_left)
-                {
-                    move_left = 0;
-                    standing_bit = 0;
-                    sleeping_x = 1;
-                    sleeping_z = 0;
-                    next_left += 90;
-                    next_right += 90;
-                    vis = 0;
-                }
+                hor_count--;
+                vis = 1;
             }
-            else if (move_left == 1 && cube[current].anglex < next_left && /*standing_bit == 0*/ sleeping_x == 1)
+            cube[current].y -= 0.025;
+            cube[current].x -= 0.075;
+            cube[current].anglex += 9;
+            if (cube[current].anglex == next_left)
             {
-                if (vis == 0)
-                {
-                    hor_count--;
-                    vis = 1;
-                }
-                cube[current].y += 0.025;
-                cube[current].x -= 0.075;
-                cube[current].anglex += 9;
-                if (cube[current].anglex == next_left)
-                {
-                    move_left = 0;
-                    standing_bit = 1;
-                    next_left += 90;
-                    next_right += 90;
-                    sleeping_x = 0;
-                    sleeping_z = 0;
-                    vis = 0;
-                }
+                move_left = 0;
+                standing_bit = 0;
+                sleeping_x = 1;
+                sleeping_z = 0;
+                next_left += 90;
+                next_right += 90;
+                vis = 0;
             }
-            else if (move_left == 1 && cube[current].angle > next_anti && sleeping_z == 1)
+        }
+        else if (move_left == 1 && cube[current].anglex < next_left && /*standing_bit == 0*/ sleeping_x == 1)
+        {
+            if (vis == 0)
             {
-                if (vis == 0)
-                {
-                    vis = 1;
-                    rot_count--;
-                }
-                cube[current].x -= 0.05;
-                cube[current].angle -= 9;
-                /*if(abs(rot_count)%4==2)
+                hor_count--;
+                vis = 1;
+            }
+            cube[current].y += 0.025;
+            cube[current].x -= 0.075;
+            cube[current].anglex += 9;
+            if (cube[current].anglex == next_left)
+            {
+                move_left = 0;
+                standing_bit = 1;
+                next_left += 90;
+                next_right += 90;
+                sleeping_x = 0;
+                sleeping_z = 0;
+                vis = 0;
+            }
+        }
+        else if (move_left == 1 && cube[current].angle > next_anti && sleeping_z == 1)
+        {
+            if (vis == 0)
+            {
+                vis = 1;
+                rot_count--;
+            }
+            cube[current].x -= 0.05;
+            cube[current].angle -= 9;
+            /*if(abs(rot_count)%4==2)
             {
                 cube[current].angle +=18;
                 if(cube[current].angle == next_clock)
@@ -839,451 +895,548 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                     sleeping_z = 1;
                 }
             }*/
-                if (cube[current].angle == next_anti)
-                {
-                    move_left = 0;
-                    next_clock -= 90;
-                    next_anti -= 90;
-                    sleeping_x = 0;
-                    standing_bit = 0;
-                    vis = 0;
-                }
-            }
-            else if (move_right == 1 && cube[current].anglex > next_right && standing_bit == 1)
+            if (cube[current].angle == next_anti)
             {
-                if (vis == 0)
-                {
-                    hor_count++;
-                    vis = 1;
-                }
-                cube[current].y -= 0.025;
-                cube[current].x += 0.075;
-                cube[current].anglex -= 9;
-                if (cube[current].anglex == next_right)
-                {
-                    standing_bit = 0;
-                    move_right = 0;
-                    next_right -= 90;
-                    next_left -= 90;
-                    sleeping_x = 1;
-                    sleeping_z = 0;
-                    vis = 0;
-                }
+                move_left = 0;
+                next_clock -= 90;
+                next_anti -= 90;
+                sleeping_x = 0;
+                standing_bit = 0;
+                vis = 0;
             }
-            else if (move_right == 1 && cube[current].anglex > next_right && sleeping_x == 1)
+        }
+        else if (move_right == 1 && cube[current].anglex > next_right && standing_bit == 1)
+        {
+            if (vis == 0)
             {
-                if (vis == 0)
-                {
-                    hor_count++;
-                    vis = 1;
-                }
-                cube[current].y += 0.025;
-                cube[current].x += 0.075;
-                cube[current].anglex -= 9;
-                if (cube[current].anglex == next_right)
-                {
-                    standing_bit = 1;
-                    move_right = 0;
-                    next_right -= 90;
-                    next_left -= 90;
-                    sleeping_x = 0;
-                    sleeping_z = 0;
-                    vis = 0;
-                }
+                hor_count++;
+                vis = 1;
             }
-            else if (move_right == 1 && cube[current].angle < next_clock && sleeping_z == 1)
+            cube[current].y -= 0.025;
+            cube[current].x += 0.075;
+            cube[current].anglex -= 9;
+            if (cube[current].anglex == next_right)
             {
-                if (vis == 0)
-                {
-                    rot_count++;
-                    vis = 1;
-                }
-                cube[current].x += 0.05;
-                cube[current].angle += 9;
-                if (cube[current].angle == next_clock)
-                {
-                    move_right = 0;
-                    next_clock += 90;
-                    next_anti += 90;
-                    sleeping_x = 0;
-                    standing_bit = 0;
-                    vis = 0;
-                }
+                standing_bit = 0;
+                move_right = 0;
+                next_right -= 90;
+                next_left -= 90;
+                sleeping_x = 1;
+                sleeping_z = 0;
+                vis = 0;
             }
-            else if (move_up == 1 && cube[current].angley > next_down && standing_bit == 1)
+        }
+        else if (move_right == 1 && cube[current].anglex > next_right && sleeping_x == 1)
+        {
+            if (vis == 0)
             {
-                cube[current].z -= 0.075;
-                cube[current].y -= 0.025;
+                hor_count++;
+                vis = 1;
+            }
+            cube[current].y += 0.025;
+            cube[current].x += 0.075;
+            cube[current].anglex -= 9;
+            if (cube[current].anglex == next_right)
+            {
+                standing_bit = 1;
+                move_right = 0;
+                next_right -= 90;
+                next_left -= 90;
+                sleeping_x = 0;
+                sleeping_z = 0;
+                vis = 0;
+            }
+        }
+        else if (move_right == 1 && cube[current].angle < next_clock && sleeping_z == 1)
+        {
+            if (vis == 0)
+            {
+                rot_count++;
+                vis = 1;
+            }
+            cube[current].x += 0.05;
+            cube[current].angle += 9;
+            if (cube[current].angle == next_clock)
+            {
+                move_right = 0;
+                next_clock += 90;
+                next_anti += 90;
+                sleeping_x = 0;
+                standing_bit = 0;
+                vis = 0;
+            }
+        }
+        else if (move_up == 1 && cube[current].angley > next_down && standing_bit == 1)
+        {
+            cube[current].z -= 0.075;
+            cube[current].y -= 0.025;
 
-                cube[current].angley -= 9;
-                // if (abs(hor_count) % 4 == 2)
-                // {
-                //     cube[current].angley += 18;
-                //     if (cube[current].angley == next_up)
-                //     {
-                //         move_up = 0;
-                //         next_up += 90;
-                //         next_down += 90;
-                //         standing_bit = 0;
-                //         sleeping_x = 0;
-                //         sleeping_z = 1;
-                //         vis = 0;
-                //     }
-                // }
-                if (cube[current].angley == next_down)
-                {
-                    standing_bit = 0;
-                    sleeping_x = 0;
-                    sleeping_z = 1;
-                    move_up = 0;
-                    next_up -= 90;
-                    next_down -= 90;
-                }
-            }
-            else if (move_up == 1 && cube[current].angley > next_down && sleeping_z == 1)
+            cube[current].angley -= 9;
+            // if (abs(hor_count) % 4 == 2)
+            // {
+            //     cube[current].angley += 18;
+            //     if (cube[current].angley == next_up)
+            //     {
+            //         move_up = 0;
+            //         next_up += 90;
+            //         next_down += 90;
+            //         standing_bit = 0;
+            //         sleeping_x = 0;
+            //         sleeping_z = 1;
+            //         vis = 0;
+            //     }
+            // }
+            if (cube[current].angley == next_down)
             {
-                cube[current].z -= 0.075;
-                cube[current].y += 0.025;
-                //cout << "LOL" << endl;
-                cube[current].angley -= 9;
-                // if (abs(hor_count) % 4 == 2)
-                // {
-                //     cube[current].angley += 18;
-                //     if (cube[current].angley == next_up)
-                //     {
-                //         move_up = 0;
-                //         next_up += 90;
-                //         next_down += 90;
-                //         standing_bit = 1;
-                //         sleeping_x = 0;
-                //         sleeping_z = 0;
-                //         vis = 0;
-                //     }
-                // }
-                if (cube[current].angley == next_down)
-                {
-                    standing_bit = 1;
-                    sleeping_x = 0;
-                    sleeping_z = 0;
-                    move_up = 0;
-                    next_up -= 90;
-                    next_down -= 90;
-                }
+                standing_bit = 0;
+                sleeping_x = 0;
+                sleeping_z = 1;
+                move_up = 0;
+                next_up -= 90;
+                next_down -= 90;
             }
-            else if (move_up == 1 && cube[current].angle < next_clock && sleeping_x == 1)
+        }
+        else if (move_up == 1 && cube[current].angley > next_down && sleeping_z == 1)
+        {
+            cube[current].z -= 0.075;
+            cube[current].y += 0.025;
+            //cout << "LOL" << endl;
+            cube[current].angley -= 9;
+            // if (abs(hor_count) % 4 == 2)
+            // {
+            //     cube[current].angley += 18;
+            //     if (cube[current].angley == next_up)
+            //     {
+            //         move_up = 0;
+            //         next_up += 90;
+            //         next_down += 90;
+            //         standing_bit = 1;
+            //         sleeping_x = 0;
+            //         sleeping_z = 0;
+            //         vis = 0;
+            //     }
+            // }
+            if (cube[current].angley == next_down)
             {
-                cube[current].z -= 0.05;
-                cube[current].angle += 9;
-                if (cube[current].angle == next_clock)
-                {
-                    move_up = 0;
-                    next_clock += 90;
-                    next_anti += 90;
-                }
+                standing_bit = 1;
+                sleeping_x = 0;
+                sleeping_z = 0;
+                move_up = 0;
+                next_up -= 90;
+                next_down -= 90;
             }
-            else if (move_down == 1 && cube[current].angley < next_up && standing_bit == 1)
+        }
+        else if (move_up == 1 && cube[current].angle < next_clock && sleeping_x == 1)
+        {
+            cube[current].z -= 0.05;
+            cube[current].angle += 9;
+            if (cube[current].angle == next_clock)
             {
-                cube[current].z += 0.075;
-                cube[current].y -= 0.025;
-                cube[current].angley += 9;
-                // if (abs(hor_count) % 4 == 2)
-                // {
-                //     cube[current].angley -= 18;
-                //     if (cube[current].angley == next_down)
-                //     {
-                //         standing_bit = 0;
-                //         sleeping_z = 1;
-                //         sleeping_x = 0;
-                //         move_down = 0;
-                //         next_up -= 90;
-                //         next_down -= 90;
-                //         vis = 0;
-                //     }
-                // }
-                if (cube[current].angley == next_up)
-                {
-                    standing_bit = 0;
-                    sleeping_x = 0;
-                    sleeping_z = 1;
-                    move_down = 0;
-                    next_up += 90;
-                    next_down += 90;
-                }
+                move_up = 0;
+                next_clock += 90;
+                next_anti += 90;
             }
-            else if (move_down == 1 && cube[current].angley < next_up && sleeping_z == 1)
+        }
+        else if (move_down == 1 && cube[current].angley < next_up && standing_bit == 1)
+        {
+            cube[current].z += 0.075;
+            cube[current].y -= 0.025;
+            cube[current].angley += 9;
+            // if (abs(hor_count) % 4 == 2)
+            // {
+            //     cube[current].angley -= 18;
+            //     if (cube[current].angley == next_down)
+            //     {
+            //         standing_bit = 0;
+            //         sleeping_z = 1;
+            //         sleeping_x = 0;
+            //         move_down = 0;
+            //         next_up -= 90;
+            //         next_down -= 90;
+            //         vis = 0;
+            //     }
+            // }
+            if (cube[current].angley == next_up)
             {
-                cube[current].z += 0.075;
-                cube[current].y += 0.025;
-                cube[current].angley += 9;
-                // if (abs(hor_count) % 4 == 2)
-                // {
-                //     cube[current].angley -= 18;
-                //     if (cube[current].angley == next_down)
-                //     {
-                //         standing_bit = 1;
-                //         sleeping_x = 0;
-                //         sleeping_z = 0;
-                //         move_down = 0;
-                //         next_up -= 90;
-                //         next_down -= 90;
-                //         vis = 0;
-                //     }
-                // }
-                if (cube[current].angley == next_up)
-                {
-                    standing_bit = 1;
-                    sleeping_x = 0;
-                    sleeping_z = 1;
-                    move_down = 0;
-                    next_up += 90;
-                    next_down += 90;
-                }
+                standing_bit = 0;
+                sleeping_x = 0;
+                sleeping_z = 1;
+                move_down = 0;
+                next_up += 90;
+                next_down += 90;
             }
-            else if (move_down == 1 && cube[current].angle > next_anti && sleeping_x == 1)
+        }
+        else if (move_down == 1 && cube[current].angley < next_up && sleeping_z == 1)
+        {
+            cube[current].z += 0.075;
+            cube[current].y += 0.025;
+            cube[current].angley += 9;
+            // if (abs(hor_count) % 4 == 2)
+            // {
+            //     cube[current].angley -= 18;
+            //     if (cube[current].angley == next_down)
+            //     {
+            //         standing_bit = 1;
+            //         sleeping_x = 0;
+            //         sleeping_z = 0;
+            //         move_down = 0;
+            //         next_up -= 90;
+            //         next_down -= 90;
+            //         vis = 0;
+            //     }
+            // }
+            if (cube[current].angley == next_up)
             {
-                //cout << next_anti << endl << cube[current].angley << endl << next_clock << endl << "lol" << endl;
-                cube[current].z += 0.05;
-                cube[current].angle -= 9;
-                if (cube[current].angle == next_anti)
-                {
-                    move_down = 0;
-                    next_clock -= 90;
-                    next_anti -= 90;
-                }
+                standing_bit = 1;
+                sleeping_x = 0;
+                sleeping_z = 1;
+                move_down = 0;
+                next_up += 90;
+                next_down += 90;
             }
+        }
+        else if (move_down == 1 && cube[current].angle > next_anti && sleeping_x == 1)
+        {
+            //cout << next_anti << endl << cube[current].angley << endl << next_clock << endl << "lol" << endl;
+            cube[current].z += 0.05;
+            cube[current].angle -= 9;
+            if (cube[current].angle == next_anti)
+            {
+                move_down = 0;
+                next_clock -= 90;
+                next_anti -= 90;
+            }
+        }
 
-            cube[current].x = roundf(cube[current].x * 100000) / 100000.0;
-            cube[current].z = roundf(cube[current].z * 100000) / 100000.0;
+        cube[current].x = roundf(cube[current].x * 100000) / 100000.0;
+        cube[current].z = roundf(cube[current].z * 100000) / 100000.0;
 
-            if (cube[current].x == goalx && cube[current].z == goalz && move_left == 0 && move_right == 0 && move_up ==0 && move_down == 0)
-            {
-                cout << "You've won" << endl;
+        if (cube[current].x == goalx && cube[current].z == goalz && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
+        {
+            cout << "You've won" << endl;
+            if (levelstate == 0)
+                cout << "NEXT LEVEL" << endl;
+            levelstate++;
+            startnextlevel();
+            if (levelstate > 1)
                 exit(0);
+        }
+
+        for (map<string, Sprite>::iterator it1 = tile.begin(); it1 != tile.end(); it1++)
+        {
+            string curr = it1->first; //The name of the current object
+
+            if (tile[curr].exists == 0)
+            {
+                continue;
             }
 
-            for (map<string, Sprite>::iterator it1 = tile.begin(); it1 != tile.end(); it1++)
+            if (abs(tile[curr].x - cube[current].x) < 0.26 && abs(tile[curr].z - cube[current].z) < 0.26)
             {
-                string curr = it1->first; //The name of the current object
-                if (abs(tile[curr].x - cube[current].x) < 0.26 && abs(tile[curr].z - cube[current].z) < 0.26)
-                {
-                    flag = 1;
-                    break;
-                }
+                flag = 1;
+                break;
+            }
+        }
+
+        for (map<string, Sprite>::iterator it1 = fragtile.begin(); it1 != fragtile.end(); it1++)
+        {
+            string curr = it1->first; //The name of the current object'
+
+            if (fragtile[curr].exists == 0)
+            {
+                continue;
             }
 
-            for (map<string, Sprite>::iterator it1 = fragtile.begin(); it1 != fragtile.end(); it1++)
+            // cout << "***" << endl;
+            // cout << cube[current].x << "___" << cube[current].y << "___" << cube[current].z << endl;
+            // cout << fragtile[curr].x << "___" << fragtile[curr].y << "___" << fragtile[curr].z << endl;
+            // cout << "standing" << standing_bit << endl;
+            // cout << "***" << endl;
+
+            if ((abs(fragtile[curr].x - cube[current].x) < 0.26 && abs(fragtile[curr].z - cube[current].z) < 0.26) && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
             {
-                string curr = it1->first; //The name of the current object'
-
-                // cout << "***" << endl;
-                // cout << cube[current].x << "___" << cube[current].y << "___" << cube[current].z << endl;
-                // cout << fragtile[curr].x << "___" << fragtile[curr].y << "___" << fragtile[curr].z << endl;
-                // cout << "standing" << standing_bit << endl;
-                // cout << "***" << endl;
-
-                if ((abs(fragtile[curr].x - cube[current].x) < 0.26 && abs(fragtile[curr].z - cube[current].z) < 0.26) && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
+                // cout << "bleh" << endl;
+                if (standing_bit && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
                 {
-                    // cout << "bleh" << endl;
-                    if (standing_bit && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
+                    // cout << cube[current].x << "---" << cube[current].y << "---" << cube[current].z << endl;
+                    // cout << fragtile[curr].x << "---" << fragtile[curr].y << "---" << fragtile[curr].z << endl;
+                    // cout << "standing" << standing_bit << endl;
+                    if (abs(fragtile[curr].x - cube[current].x) < 0.01 && abs(fragtile[curr].z - cube[current].z) < 0.01)
                     {
-                        // cout << cube[current].x << "---" << cube[current].y << "---" << cube[current].z << endl;
-                        // cout << fragtile[curr].x << "---" << fragtile[curr].y << "---" << fragtile[curr].z << endl;
-                        // cout << "standing" << standing_bit << endl;
-                        if (abs(fragtile[curr].x - cube[current].x) < 0.01 && abs(fragtile[curr].z - cube[current].z) < 0.01)
-                        {
-                            // cout << "dead" << endl;
-                            flag = 0;
-                        }
-                        else
-                            flag = 1;
+                        // cout << "dead" << endl;
+                        flag = 0;
                     }
                     else
                         flag = 1;
                 }
-                else if((abs(fragtile[curr].x - cube[current].x) < 0.26 && abs(fragtile[curr].z - cube[current].z) < 0.26))
-                {
+                else
                     flag = 1;
-                }
+            }
+            else if ((abs(fragtile[curr].x - cube[current].x) < 0.26 && abs(fragtile[curr].z - cube[current].z) < 0.26))
+            {
+                flag = 1;
+            }
+        }
+
+        for (map<string, Sprite>::iterator it1 = teles.begin(); it1 != teles.end(); it1++)
+        {
+            string curr = it1->first; //The name of the current object'
+
+            if (teles[curr].exists == 0)
+            {
+                continue;
             }
 
-            for (map<string, Sprite>::iterator it1 = toggle.begin(); it1 != toggle.end(); it1++)
-            {
-                string curr = it1->first; //The name of the current object
-                if (abs(toggle[curr].x - cube[current].x) < 0.26 && abs(toggle[curr].z - cube[current].z) < 0.26)
-                {
-                    flag = 1;
-                    if (bridge[curr].exists == 0)
-                        toggle[curr].y -= 0.1;
-                    bridge[curr].exists = 1;
-                    stringstream ss;
-                    ss << curr;
-                    ss << "2";
-                    bridge[ss.str()].exists = 1;
+            // cout << "***" << endl;
+            // cout << cube[current].x << "___" << cube[current].y << "___" << cube[current].z << endl;
+            // cout << teles[curr].x << "___" << teles[curr].y << "___" << teles[curr].z << endl;
+            // cout << "standing" << standing_bit << endl;
+            // cout << "***" << endl;
 
+            if ((abs(teles[curr].x - cube[current].x) < 0.26 && abs(teles[curr].z - cube[current].z) < 0.26) && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
+            {
+                // cout << "bleh" << endl;
+                if (standing_bit && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
+                {
+                    // cout << cube[current].x << "---" << cube[current].y << "---" << cube[current].z << endl;
+                    // cout << teles[curr].x << "---" << teles[curr].y << "---" << teles[curr].z << endl;
+                    // cout << "standing" << standing_bit << endl;
+                    if (abs(teles[curr].x - cube[current].x) < 0.01 && abs(teles[curr].z - cube[current].z) < 0.01)
+                    {
+                        // cout << "dead" << endl;
+                        // flag = 0;
+                        cube["maincube"].x = 3.5;
+                        cube["maincube"].z = 0;
+                        flag = 1;
+                    }
+                    else
+                        flag = 1;
                 }
+                else
+                    flag = 1;
+            }
+            else if ((abs(teles[curr].x - cube[current].x) < 0.26 && abs(teles[curr].z - cube[current].z) < 0.26))
+            {
+                flag = 1;
+            }
+        }
+
+        for (map<string, Sprite>::iterator it1 = toggle.begin(); it1 != toggle.end(); it1++)
+        {
+            string curr = it1->first; //The name of the current object
+
+            if (toggle[curr].exists == 0)
+            {
+                continue;
             }
 
-            for (map<string, Sprite>::iterator it2 = bridge.begin(); it2 != bridge.end(); it2++)
+            if (abs(toggle[curr].x - cube[current].x) < 0.26 && abs(toggle[curr].z - cube[current].z) < 0.26)
             {
-                // cout << "namaste" << endl;
-                string curr = it2->first; //The name of the current object
-                float w = cube[current].width;
-                float d = cube[current].depth;
+                flag = 1;
                 if (bridge[curr].exists == 0)
-                    continue;
-
-                // cout<< "____" << endl;
-
-                if(abs(bridge[curr].x - cube[current].x) < 0.26 && abs(bridge[curr].z - cube[current].z) < 0.26)
-                {
-                    // cout << "heyhey" << endl;
-                    flag = 1;
-                }
+                    toggle[curr].y -= 0.1;
+                bridge[curr].exists = 1;
+                stringstream ss;
+                ss << curr;
+                ss << "2";
+                bridge[ss.str()].exists = 1;
             }
-
-            // cout << "flag = " << flag << endl;
-
-            // cout << "cube" << cube[current].x << "___" << cube[current].z;
-
-            if (flag == 0)
-            {
-                cout << "GAME OVER" << endl;
-                exit(0);
-            }
-
-            glm::mat4 MVP; // MVP = Projection * View * Model
-
-            Matrices.model = glm::mat4(1.0f);
-
-            /* Render your scene */
-            glm::mat4 ObjectTransform;
-            glm::mat4 translateObject = glm::translate(glm::vec3(cube[current].x, cube[current].y, cube[current].z));   // glTranslatef
-            glm::mat4 rotateTriangle = glm::rotate((float)((cube[current].anglex) * M_PI / 180.0f), glm::vec3(0, 0, 1)); // rotate about vector (1,0,0)
-            glm::mat4 rotateTriangle1 = glm::rotate((float)((cube[current].angley) * M_PI / 180.0f), glm::vec3(1, 0, 0));
-            glm::mat4 rotateTriangle2 = glm::rotate((float)((cube[current].angle) * M_PI / 180.0f), glm::vec3(0, 1, 0)); // rotate about vector (1,0,0)
-
-            ObjectTransform = translateObject * rotateTriangle * rotateTriangle1 * rotateTriangle2;
-            Matrices.model *= ObjectTransform;
-            MVP = VP * Matrices.model; // MVP = p * V * M
-
-            glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-            draw3DObject(cube[current].object);
-
-            //glPopMatrix ();
         }
 
-        for (map<string, Sprite>::iterator it = tile.begin(); it != tile.end(); it++)
+        for (map<string, Sprite>::iterator it2 = bridge.begin(); it2 != bridge.end(); it2++)
         {
-            string current = it->first; //The name of the current object
-            if (tile[current].exists == 0)
+            // cout << "namaste" << endl;
+            string curr = it2->first; //The name of the current object
+
+            if (bridge[curr].exists == 0)
             {
                 continue;
             }
-            glm::mat4 MVP; // MVP = Projection * View * Model
 
-            Matrices.model = glm::mat4(1.0f);
-
-            /* Render your scene */
-            glm::mat4 ObjectTransform;
-            glm::mat4 translateObject = glm::translate(glm::vec3(tile[current].x, tile[current].y, tile[current].z)); // glTranslatef
-            glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                 // rotate about vector (1,0,0)
-
-            ObjectTransform = translateObject * rotateTriangle;
-            Matrices.model *= ObjectTransform;
-            MVP = VP * Matrices.model; // MVP = p * V * M
-
-            glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-            draw3DObject(tile[current].object);
-
-            //glPopMatrix ();
-        }
-
-        for (map<string, Sprite>::iterator it = fragtile.begin(); it != fragtile.end(); it++)
-        {
-            string current = it->first; //The name of the current object
-            if (fragtile[current].exists == 0)
-            {
+            float w = cube[current].width;
+            float d = cube[current].depth;
+            if (bridge[curr].exists == 0)
                 continue;
-            }
-            glm::mat4 MVP; // MVP = Projection * View * Model
 
-            Matrices.model = glm::mat4(1.0f);
+            // cout<< "____" << endl;
 
-            /* Render your scene */
-            glm::mat4 ObjectTransform;
-            glm::mat4 translateObject = glm::translate(glm::vec3(fragtile[current].x, fragtile[current].y, fragtile[current].z)); // glTranslatef
-            glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                             // rotate about vector (1,0,0)
-
-            ObjectTransform = translateObject * rotateTriangle;
-            Matrices.model *= ObjectTransform;
-            MVP = VP * Matrices.model; // MVP = p * V * M
-
-            glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-            draw3DObject(fragtile[current].object);
-
-            //glPopMatrix ();
-        }
-
-        for (map<string, Sprite>::iterator it = toggle.begin(); it != toggle.end(); it++)
-        {
-            string current = it->first; //The name of the current object
-            if (toggle[current].exists == 0)
+            if (abs(bridge[curr].x - cube[current].x) < 0.26 && abs(bridge[curr].z - cube[current].z) < 0.26)
             {
-                continue;
+                // cout << "heyhey" << endl;
+                flag = 1;
             }
-            glm::mat4 MVP; // MVP = Projection * View * Model
-
-            Matrices.model = glm::mat4(1.0f);
-
-            /* Render your scene */
-            glm::mat4 ObjectTransform;
-            glm::mat4 translateObject = glm::translate(glm::vec3(toggle[current].x, toggle[current].y, toggle[current].z)); // glTranslatef
-            glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                       // rotate about vector (1,0,0)
-
-            ObjectTransform = translateObject * rotateTriangle;
-            Matrices.model *= ObjectTransform;
-            MVP = VP * Matrices.model; // MVP = p * V * M
-
-            glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-            draw3DObject(toggle[current].object);
-
-            //glPopMatrix ();
         }
 
-        for (map<string, Sprite>::iterator it = bridge.begin(); it != bridge.end(); it++)
+        // cout << "flag = " << flag << endl;
+
+        // cout << "cube" << cube[current].x << "___" << cube[current].z;
+
+        if (flag == 0)
         {
-            string current = it->first; //The name of the current object
-            if (bridge[current].exists == 0)
-            {
-                continue;
-            }
-            glm::mat4 MVP; // MVP = Projection * View * Model
-
-            Matrices.model = glm::mat4(1.0f);
-
-            /* Render your scene */
-            glm::mat4 ObjectTransform;
-            glm::mat4 translateObject = glm::translate(glm::vec3(bridge[current].x, bridge[current].y, bridge[current].z)); // glTranslatef
-            glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                       // rotate about vector (1,0,0)
-
-            ObjectTransform = translateObject * rotateTriangle;
-            Matrices.model *= ObjectTransform;
-            MVP = VP * Matrices.model; // MVP = p * V * M
-
-            glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-            draw3DObject(bridge[current].object);
-
-            //glPopMatrix ();
+            cout << "GAME OVER" << endl;
+            exit(0);
         }
 
-        //camera_rotation_angle++; // Simulating camera rotation
-        //  triangle_rotation = triangle_rotation + increments*triangle_rot_dir*triangle_rot_status;
-        //  rectangle_rotation = rectangle_rotation + increments*rectangle_rot_dir*rectangle_rot_status;
+        glm::mat4 MVP; // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        /* Render your scene */
+        glm::mat4 ObjectTransform;
+        glm::mat4 translateObject = glm::translate(glm::vec3(cube[current].x, cube[current].y, cube[current].z));    // glTranslatef
+        glm::mat4 rotateTriangle = glm::rotate((float)((cube[current].anglex) * M_PI / 180.0f), glm::vec3(0, 0, 1)); // rotate about vector (1,0,0)
+        glm::mat4 rotateTriangle1 = glm::rotate((float)((cube[current].angley) * M_PI / 180.0f), glm::vec3(1, 0, 0));
+        glm::mat4 rotateTriangle2 = glm::rotate((float)((cube[current].angle) * M_PI / 180.0f), glm::vec3(0, 1, 0)); // rotate about vector (1,0,0)
+
+        ObjectTransform = translateObject * rotateTriangle * rotateTriangle1 * rotateTriangle2;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(cube[current].object);
+
+        //glPopMatrix ();
+    }
+
+    for (map<string, Sprite>::iterator it = tile.begin(); it != tile.end(); it++)
+    {
+        string current = it->first; //The name of the current object
+        if (tile[current].exists == 0)
+        {
+            continue;
+        }
+        glm::mat4 MVP; // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        /* Render your scene */
+        glm::mat4 ObjectTransform;
+        glm::mat4 translateObject = glm::translate(glm::vec3(tile[current].x, tile[current].y, tile[current].z)); // glTranslatef
+        glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                 // rotate about vector (1,0,0)
+
+        ObjectTransform = translateObject * rotateTriangle;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(tile[current].object);
+
+        //glPopMatrix ();
+    }
+
+    for (map<string, Sprite>::iterator it = fragtile.begin(); it != fragtile.end(); it++)
+    {
+        string current = it->first; //The name of the current object
+        if (fragtile[current].exists == 0)
+        {
+            continue;
+        }
+        glm::mat4 MVP; // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        /* Render your scene */
+        glm::mat4 ObjectTransform;
+        glm::mat4 translateObject = glm::translate(glm::vec3(fragtile[current].x, fragtile[current].y, fragtile[current].z)); // glTranslatef
+        glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                             // rotate about vector (1,0,0)
+
+        ObjectTransform = translateObject * rotateTriangle;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(fragtile[current].object);
+
+        //glPopMatrix ();
+    }
+
+    for (map<string, Sprite>::iterator it = teles.begin(); it != teles.end(); it++)
+    {
+        string current = it->first; //The name of the current object
+        if (teles[current].exists == 0)
+        {
+            continue;
+        }
+        glm::mat4 MVP; // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        /* Render your scene */
+        glm::mat4 ObjectTransform;
+        glm::mat4 translateObject = glm::translate(glm::vec3(teles[current].x, teles[current].y, teles[current].z)); // glTranslatef
+        glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                             // rotate about vector (1,0,0)
+
+        ObjectTransform = translateObject * rotateTriangle;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(teles[current].object);
+
+        //glPopMatrix ();
+    }
+
+    for (map<string, Sprite>::iterator it = toggle.begin(); it != toggle.end(); it++)
+    {
+        string current = it->first; //The name of the current object
+        if (toggle[current].exists == 0)
+        {
+            continue;
+        }
+        glm::mat4 MVP; // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        /* Render your scene */
+        glm::mat4 ObjectTransform;
+        glm::mat4 translateObject = glm::translate(glm::vec3(toggle[current].x, toggle[current].y, toggle[current].z)); // glTranslatef
+        glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                       // rotate about vector (1,0,0)
+
+        ObjectTransform = translateObject * rotateTriangle;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(toggle[current].object);
+
+        //glPopMatrix ();
+    }
+
+    for (map<string, Sprite>::iterator it = bridge.begin(); it != bridge.end(); it++)
+    {
+        string current = it->first; //The name of the current object
+        if (bridge[current].exists == 0)
+        {
+            continue;
+        }
+        glm::mat4 MVP; // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        /* Render your scene */
+        glm::mat4 ObjectTransform;
+        glm::mat4 translateObject = glm::translate(glm::vec3(bridge[current].x, bridge[current].y, bridge[current].z)); // glTranslatef
+        glm::mat4 rotateTriangle = glm::rotate((float)((0) * M_PI / 180.0f), glm::vec3(0, 1, 0));                       // rotate about vector (1,0,0)
+
+        ObjectTransform = translateObject * rotateTriangle;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(bridge[current].object);
+
+        //glPopMatrix ();
+    }
+
+    //camera_rotation_angle++; // Simulating camera rotation
+    //  triangle_rotation = triangle_rotation + increments*triangle_rot_dir*triangle_rot_status;
+    //  rectangle_rotation = rectangle_rotation + increments*rectangle_rot_dir*rectangle_rot_status;
     }
 
 /* Initialise glfw window, I/O callbacks and the renderer to use */
@@ -1369,6 +1522,7 @@ void initGL(GLFWwindow *window, int width, int height)
     createRectangle("t(-2,-1)", -2, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(-2,0)", -2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(-3.5,0)", -3.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("goal", 2, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, bg);
 
     //bridge and switch pairs
     createRectangle("s1", -1.5, -0.7, -0.5, 0.4, 0.4, 0.4, "toggle", 0, grey);
