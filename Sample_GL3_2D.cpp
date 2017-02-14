@@ -80,6 +80,7 @@ map<string, Sprite> fragtile;
 map<string, Sprite> bridge;
 map<string, Sprite> toggle;
 map<string, Sprite> teles;
+map <string, Sprite> scoredisp;
 
 GLuint programID;
 int proj_type;
@@ -87,7 +88,7 @@ float goalx = 2, goalz = 0;
 float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
 
-int right_mouse_clicked = 0, left_mouse_clicked = 0;
+int right_mouse_clicked = 0, left_mouse_clicked = 0, score = 0;
 
 int vis = 0, blockview = 0, defview = 1, topview = 0, blockangle = 90, followview = 0;
 int standing_bit = 1, move_left = 0, move_right = 0, move_up = 0, move_down = 0,sleeping_x = 0, sleeping_z = 0, move_clock = 0, move_anti = 0;
@@ -348,15 +349,19 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
         break;
     case 'a':
         move_left = 1;
+        score += 1;
         break;
     case 'd':
         move_right = 1;
+        score += 1;
         break;
     case 'w':
         move_up = 1;
+        score += 1;
         break;
     case 's':
         move_down = 1;
+        score += 1;
         break;
     case 'f':
         if(camerax == cameraxdef && cameray == cameraydef && cameraz == camerazdef)
@@ -690,6 +695,10 @@ void createRectangle(string name, float x, float y, float z, float width, float 
     else if(type == "teles")
     {
         teles[name] = elem;
+    }
+    else if(type == "scoredisp")
+    {
+        scoredisp[name] = elem;
     }
 }
 
@@ -1420,11 +1429,400 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
 
         //glPopMatrix ();
     }
+    for(map<string,Sprite>::iterator it=scoredisp.begin(); it!=scoredisp.end(); it++)
+    {
+        string current = it->first; //The name of the current object
+        if(scoredisp[current].exists==0)
+        {
+            continue;
+        }
+        glm::mat4 MVP;  // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        /* Render your scene */
+        glm::mat4 ObjectTransform;
+        glm::mat4 translateObject = glm::translate (glm::vec3(scoredisp[current].x, scoredisp[current].y, 0.0f)); // glTranslatef
+        glm::mat4 rotateTriangle = glm::rotate((float)((scoredisp[current].angle)*M_PI/180.0f), glm::vec3(0,0,1));  // rotate about vector (1,0,0)
+
+        ObjectTransform=translateObject*rotateTriangle;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(scoredisp[current].object);
+        //glPopMatrix ();
+    }
 
     //camera_rotation_angle++; // Simulating camera rotation
     //  triangle_rotation = triangle_rotation + increments*triangle_rot_dir*triangle_rot_status;
     //  rectangle_rotation = rectangle_rotation + increments*rectangle_rot_dir*rectangle_rot_status;
+}
+
+void disp1(int digit)
+{
+  if(digit == 0)
+  {
+    scoredisp["score1.2"].exists = 0;
+
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.3"].exists = 1;
+    scoredisp["score1.4"].exists = 1;
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.6"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 1)
+  {
+    scoredisp["score1.1"].exists = 0;
+    scoredisp["score1.2"].exists = 0;
+    scoredisp["score1.3"].exists = 0;
+    scoredisp["score1.4"].exists = 0;
+    scoredisp["score1.6"].exists = 0;
+
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 2)
+  {
+    scoredisp["score1.4"].exists = 0;
+    scoredisp["score1.7"].exists = 0;
+
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.2"].exists = 1;
+    scoredisp["score1.3"].exists = 1;
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.6"].exists = 1;
+  }
+  else if(digit == 3)
+  {
+    scoredisp["score1.4"].exists = 0;
+    scoredisp["score1.6"].exists = 0;
+
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.2"].exists = 1;
+    scoredisp["score1.3"].exists = 1;
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 4)
+  {
+    scoredisp["score1.1"].exists = 0;
+    scoredisp["score1.3"].exists = 0;
+    scoredisp["score1.6"].exists = 0;
+
+    scoredisp["score1.2"].exists = 1;
+    scoredisp["score1.4"].exists = 1;
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 5)
+  {
+    scoredisp["score1.5"].exists = 0;
+    scoredisp["score1.6"].exists = 0;
+
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.2"].exists = 1;
+    scoredisp["score1.3"].exists = 1;
+    scoredisp["score1.4"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 6)
+  {
+    scoredisp["score1.5"].exists = 0;
+
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.2"].exists = 1;
+    scoredisp["score1.3"].exists = 1;
+    scoredisp["score1.4"].exists = 1;
+    scoredisp["score1.6"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 7)
+  {
+    scoredisp["score1.2"].exists = 0;
+    scoredisp["score1.3"].exists = 0;
+    scoredisp["score1.4"].exists = 0;
+    scoredisp["score1.6"].exists = 0;
+
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 8)
+  {
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.2"].exists = 1;
+    scoredisp["score1.3"].exists = 1;
+    scoredisp["score1.4"].exists = 1;
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.6"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+  else if(digit == 9)
+  {
+    scoredisp["score1.6"].exists = 0;
+
+    scoredisp["score1.1"].exists = 1;
+    scoredisp["score1.2"].exists = 1;
+    scoredisp["score1.3"].exists = 1;
+    scoredisp["score1.4"].exists = 1;
+    scoredisp["score1.5"].exists = 1;
+    scoredisp["score1.7"].exists = 1;
+  }
+}
+
+void disp10(int digit)
+{
+  if(digit == 0)
+    {
+      scoredisp["score2.2"].exists = 0;
+
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.3"].exists = 1;
+      scoredisp["score2.4"].exists = 1;
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.6"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
     }
+    else if(digit == 1)
+    {
+      scoredisp["score2.1"].exists = 0;
+      scoredisp["score2.2"].exists = 0;
+      scoredisp["score2.3"].exists = 0;
+      scoredisp["score2.4"].exists = 0;
+      scoredisp["score2.6"].exists = 0;
+
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+    else if(digit == 2)
+    {
+      scoredisp["score2.4"].exists = 0;
+      scoredisp["score2.7"].exists = 0;
+
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.2"].exists = 1;
+      scoredisp["score2.3"].exists = 1;
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.6"].exists = 1;
+    }
+    else if(digit == 3)
+    {
+      scoredisp["score2.4"].exists = 0;
+      scoredisp["score2.6"].exists = 0;
+
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.2"].exists = 1;
+      scoredisp["score2.3"].exists = 1;
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+    else if(digit == 4)
+    {
+      scoredisp["score2.1"].exists = 0;
+      scoredisp["score2.3"].exists = 0;
+      scoredisp["score2.6"].exists = 0;
+
+      scoredisp["score2.2"].exists = 1;
+      scoredisp["score2.4"].exists = 1;
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+    else if(digit == 5)
+    {
+      scoredisp["score2.5"].exists = 0;
+      scoredisp["score2.6"].exists = 0;
+
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.2"].exists = 1;
+      scoredisp["score2.3"].exists = 1;
+      scoredisp["score2.4"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+    else if(digit == 6)
+    {
+      scoredisp["score2.5"].exists = 0;
+
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.2"].exists = 1;
+      scoredisp["score2.3"].exists = 1;
+      scoredisp["score2.4"].exists = 1;
+      scoredisp["score2.6"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+    else if(digit == 7)
+    {
+      scoredisp["score2.2"].exists = 0;
+      scoredisp["score2.3"].exists = 0;
+      scoredisp["score2.4"].exists = 0;
+      scoredisp["score2.6"].exists = 0;
+
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+    else if(digit == 8)
+    {
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.2"].exists = 1;
+      scoredisp["score2.3"].exists = 1;
+      scoredisp["score2.4"].exists = 1;
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.6"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+    else if(digit == 9)
+    {
+      scoredisp["score2.6"].exists = 0;
+
+      scoredisp["score2.1"].exists = 1;
+      scoredisp["score2.2"].exists = 1;
+      scoredisp["score2.3"].exists = 1;
+      scoredisp["score2.4"].exists = 1;
+      scoredisp["score2.5"].exists = 1;
+      scoredisp["score2.7"].exists = 1;
+    }
+}
+
+void disp100(int digit)
+{
+  if(digit == 0)
+    {
+      scoredisp["score3.2"].exists = 0;
+
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.3"].exists = 1;
+      scoredisp["score3.4"].exists = 1;
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.6"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 1)
+    {
+      scoredisp["score3.1"].exists = 0;
+      scoredisp["score3.2"].exists = 0;
+      scoredisp["score3.3"].exists = 0;
+      scoredisp["score3.4"].exists = 0;
+      scoredisp["score3.6"].exists = 0;
+
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 2)
+    {
+      scoredisp["score3.4"].exists = 0;
+      scoredisp["score3.7"].exists = 0;
+
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.2"].exists = 1;
+      scoredisp["score3.3"].exists = 1;
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.6"].exists = 1;
+    }
+    else if(digit == 3)
+    {
+      scoredisp["score3.4"].exists = 0;
+      scoredisp["score3.6"].exists = 0;
+
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.2"].exists = 1;
+      scoredisp["score3.3"].exists = 1;
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 4)
+    {
+      scoredisp["score3.1"].exists = 0;
+      scoredisp["score3.3"].exists = 0;
+      scoredisp["score3.6"].exists = 0;
+
+      scoredisp["score3.2"].exists = 1;
+      scoredisp["score3.4"].exists = 1;
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 5)
+    {
+      scoredisp["score3.5"].exists = 0;
+      scoredisp["score3.6"].exists = 0;
+
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.2"].exists = 1;
+      scoredisp["score3.3"].exists = 1;
+      scoredisp["score3.4"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 6)
+    {
+      scoredisp["score3.5"].exists = 0;
+
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.2"].exists = 1;
+      scoredisp["score3.3"].exists = 1;
+      scoredisp["score3.4"].exists = 1;
+      scoredisp["score3.6"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 7)
+    {
+      scoredisp["score3.2"].exists = 0;
+      scoredisp["score3.3"].exists = 0;
+      scoredisp["score3.4"].exists = 0;
+      scoredisp["score3.6"].exists = 0;
+
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 8)
+    {
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.2"].exists = 1;
+      scoredisp["score3.3"].exists = 1;
+      scoredisp["score3.4"].exists = 1;
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.6"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+    else if(digit == 9)
+    {
+      scoredisp["score3.6"].exists = 0;
+
+      scoredisp["score3.1"].exists = 1;
+      scoredisp["score3.2"].exists = 1;
+      scoredisp["score3.3"].exists = 1;
+      scoredisp["score3.4"].exists = 1;
+      scoredisp["score3.5"].exists = 1;
+      scoredisp["score3.7"].exists = 1;
+    }
+}
+
+void Dispscore()
+{
+  int temp = score;
+  if(temp < 0)
+  {
+    exit(0);
+  }
+  if(temp <= 999)
+  {
+    scoredisp["sign"].exists = 0;
+    disp1(temp % 10);
+    temp /= 10;
+    disp10(temp % 10);
+    temp /= 10;
+    disp100(temp % 10);
+  }
+  else
+  {
+    scoredisp["sign"].exists = 0;
+    disp1(9);
+    disp10(9);
+    disp100(9);
+  }
+}
 
 /* Initialise glfw window, I/O callbacks and the renderer to use */
 /* Nothing to Edit here */
@@ -1521,6 +1919,33 @@ void initGL(GLFWwindow *window, int width, int height)
     createRectangle("t(1,0.5)", 1, -0.7, 0.5, 0.5, 0.1, 0.5, "fragtile", 0, teal);
     createRectangle("t(2.5,0)", 0.5 + 2, -0.7, 0, 0.5, 0.1, 0.5, "fragtile", 0, teal);
 
+    // scoreboard
+    createRectangle("sign", 0.7, 3.3, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+
+    createRectangle("score1.1", 1, 3.5, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score1.2", 1, 3.3, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score1.3", 1, 3.1, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score1.4", 0.9, 3.4, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score1.5", 1.1, 3.4, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score1.6", 0.9, 3.2, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score1.7", 1.1, 3.2, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+
+    createRectangle("score2.1", 0.7, 3.5, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score2.2", 0.7, 3.3, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score2.3", 0.7, 3.1, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score2.4", 0.6, 3.4, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score2.5", 0.8, 3.4, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score2.6", 0.6, 3.2, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score2.7", 0.8, 3.2, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+
+    createRectangle("score3.1", 0.4, 3.5, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score3.2", 0.4, 3.3, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score3.3", 0.4, 3.1, 0, 0.2, 0.05, 0.05, "scoredisp", 0, steel);
+    createRectangle("score3.4", 0.3, 3.4, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score3.5", 0.5, 3.4, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score3.6", 0.3, 3.2, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+    createRectangle("score3.7", 0.5, 3.2, 0, 0.05, 0.2, 0.05, "scoredisp", 0, steel);
+
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -1580,6 +2005,10 @@ int main(int argc, char **argv)
     // format.matrix = 0;
     // dev = ao_open_live(driver, &format, NULL);
 
+    scoredisp["score1.2"].exists = 0;
+    scoredisp["score2.2"].exists = 0;
+    scoredisp["score3.2"].exists = 0;
+
     /* Draw in loop */
     while (!glfwWindowShouldClose(window))
     {
@@ -1598,6 +2027,8 @@ int main(int argc, char **argv)
         // proj_type ^= 1;
         // draw(window, 0.5, 0, 0.5, 1);
         // proj_type ^= 1;
+
+        Dispscore();
 
         // Swap Frame Buffer in double buffering
         glfwSwapBuffers(window);
