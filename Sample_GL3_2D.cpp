@@ -85,7 +85,7 @@ float goalx = 2, goalz = 0;
 float camera_zoom = 0.2;
 float camera_rotation_angle = 90;
 
-int vis = 0, blockview = 0, defview = 1, topview = 0;
+int vis = 0, blockview = 0, defview = 1, topview = 0, blockangle = 90;
 int standing_bit = 1, move_left = 0, move_right = 0, move_up = 0, move_down = 0,sleeping_x = 0, sleeping_z = 0, move_clock = 0, move_anti = 0;
 int next_left = 90, next_right = -90, next_up = 90, next_down =-90, hor_count = 0, ver_count = 0, next_clock = 90, next_anti = -90,rot_count = 0;
 float cameraxdef = 5, cameraydef = 4, camerazdef = 5, camerax = cameraxdef, cameray = cameraydef, cameraz = camerazdef;
@@ -307,10 +307,30 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
     switch (key)
     {
     case 'o':
-        camera_rotation_angle += 5;
+        if(blockview == 1)
+        {
+            blockangle += 5;
+            targetx = 1 * cos(blockangle * M_PI / 180);
+            targety = 0;
+            targetz = 1 * sin(blockangle * M_PI / 180);
+        }
+        else
+        {
+            camera_rotation_angle += 5;
+        }
         break;
     case 'p':
-        camera_rotation_angle -= 5;
+        if(blockview == 1)
+        {
+            blockangle -= 5;
+            targetx = 1 * cos(blockangle * M_PI / 180);
+            targety = 0;
+            targetz = 1 * sin(blockangle * M_PI / 180);
+        }
+        else
+        {
+            camera_rotation_angle -= 5;
+        }
         break;
     case 'Q':
     case 'q':
@@ -687,9 +707,9 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             cameray = cube["maincube"].y + 0.25;
             cameraz = cube["maincube"].z;
         }
-        targetx = 0;
+        targetx = 1 * cos(blockangle * M_PI / 180);
         targety = 0;
-        targetz = 0;
+        targetz = 1 * sin(blockangle * M_PI / 180);
     }
     else if(defview == 1)
     {
