@@ -50,11 +50,11 @@ struct COLOR
 };
 
 typedef struct COLOR color;
-COLOR red = {0.882, 0.3333, 0.3333};
+COLOR red = {255 / 255.0, 175 / 255.0, 135 / 255};
 COLOR green = {0.1255, 0.75, 0.333};
-COLOR black = {0, 0, 0};
-COLOR steel = {196 / 255.0, 231 / 255.0, 249 / 255.0};
-COLOR yellow = {244 / 255.0, 203 / 255.0, 66 / 255.0};
+COLOR black = {127 / 255.0, 150 / 255.0, 1.0};
+COLOR steel = {219 / 255.0, 252 / 255.0, 255 / 255.0};
+COLOR yellow = {229 / 255.0, 99 / 255.0, 153 / 255.0};
 COLOR coolblue = {66 / 255.0, 229 / 255.0, 244 / 255.0};
 COLOR coolgreen = {0 / 255.0, 153 / 255.0, 51 / 255.0};
 COLOR grey = {166 / 255.0, 166 / 255.0, 166 / 255.0};
@@ -101,7 +101,6 @@ int levelstate = 0;
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
 {
-
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -142,7 +141,6 @@ GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
     glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     std::vector<char> VertexShaderErrorMessage(InfoLogLength);
     glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-    //    fprintf(stdout, "%s\n", &VertexShaderErrorMessage[0]);
 
     // Compile Fragment Shader
     //    printf("Compiling shader : %s\n", fragment_file_path);
@@ -155,10 +153,10 @@ GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
     glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     std::vector<char> FragmentShaderErrorMessage(InfoLogLength);
     glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-    //    fprintf(stdout, "%s\n", &FragmentShaderErrorMessage[0]);
+    // fprintf(stdout, "%s\n", &FragmentShaderErrorMessage[0]);
 
     // Link the program
-    //    fprintf(stdout, "Linking program\n");
+    // fprintf(stdout, "Linking program\n");
     GLuint ProgramID = glCreateProgram();
     glAttachShader(ProgramID, VertexShaderID);
     glAttachShader(ProgramID, FragmentShaderID);
@@ -169,7 +167,7 @@ GLuint LoadShaders(const char *vertex_file_path, const char *fragment_file_path)
     glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
     std::vector<char> ProgramErrorMessage(max(InfoLogLength, int(1)));
     glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-    //    fprintf(stdout, "%s\n", &ProgramErrorMessage[0]);
+    // fprintf(stdout, "%s\n", &ProgramErrorMessage[0]);
 
     glDeleteShader(VertexShaderID);
     glDeleteShader(FragmentShaderID);
@@ -279,16 +277,10 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    // Function is called first on GLFW_PRESS.
-
     if (action == GLFW_RELEASE)
     {
         switch (key)
         {
-        case GLFW_KEY_C:
-            break;
-        case GLFW_KEY_P:
-            break;
         case GLFW_KEY_X:
             // do something ..
             break;
@@ -1262,15 +1254,14 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
                 flag = 1;
             }
         }
-
-        // cout << "flag = " << flag << endl;
-
-        // cout << "cube" << cube[current].x << "___" << cube[current].z;
-
         if (flag == 0)
         {
-            cout << "GAME OVER" << endl;
-            exit(0);
+            cube["maincube"].y -= 0.03;
+            if(cube["maincube"].y <= -5)
+            {
+                cout << "GAME OVER" << endl;
+                exit(0);
+            }
         }
 
         glm::mat4 MVP; // MVP = Projection * View * Model
@@ -1954,7 +1945,7 @@ void initGL(GLFWwindow *window, int width, int height)
     reshapeWindow(window, width, height);
 
     // Background color of the scene
-    glClearColor(0.3f, 0.3f, 0.3f, 0.0f); // R, G, B, A
+    glClearColor(50 / 255.0,  14 / 255.0, 59 / 255.0, 0.0f); // R, G, B, A
     glClearDepth(1.0f);
 
     glEnable(GL_DEPTH_TEST);
@@ -2038,10 +2029,11 @@ int main(int argc, char **argv)
 
         // Control based on time (Time based transformation like 5 degrees rotation every 0.5s)
         current_time = glfwGetTime(); // Time in seconds
-        if ((current_time - last_update_time) >= 0.5)
+        if ((current_time - last_update_time) >= 5)
         { // atleast 0.5s elapsed since last frame
             // do something every 0.5 seconds ..
             last_update_time = current_time;
+            cout<<"time elapsed: "<<(int)last_update_time<<endl;
         }
     }
 
