@@ -717,9 +717,9 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
     glfwGetCursorPos(window, &new_mouse_x, &new_mouse_y);
     if (left_mouse_clicked == 1)
     {
-        camera_rotation_angle += (new_mouse_x * 360 / 600.0);
-        camerax = -1 * (-50 + 800 * cos(camera_rotation_angle * M_PI / 180));
-        cameraz = -1 * ( -50 + 800 * sin(camera_rotation_angle * M_PI / 180));
+        camera_rotation_angle = (new_mouse_x * 360 / 600.0);
+        camerax = cameraxdef;
+        cameraz = cameraydef;
     }
     // use the loaded shader program
     // Don't change unless you know what you are doing
