@@ -95,6 +95,7 @@ int standing_bit = 1, move_left = 0, move_right = 0, move_up = 0, move_down = 0,
 int next_left = 90, next_right = -90, next_up = 90, next_down =-90, hor_count = 0, ver_count = 0, next_clock = 90, next_anti = -90,rot_count = 0;
 float cameraxdef = 5, cameraydef = 4, camerazdef = 5, camerax = cameraxdef, cameray = cameraydef, cameraz = camerazdef;
 float targetx = 0, targety = 0, targetz = 0;
+int telcount = 0;
 
 int levelstate = 0;
 
@@ -1094,9 +1095,37 @@ void draw(GLFWwindow *window, float x, float y, float w, float h)
             {
                 if(standing_bit && move_left == 0 && move_right == 0 && move_up == 0 && move_down == 0)
                 {
-                    if(abs(teles[curr].x - cube[current].x) < 0.01 && abs(teles[curr].z - cube[current].z) < 0.01)
+                    if(abs(teles[curr].x - cube[current].x) < 0.001 && abs(teles[curr].z - cube[current].z) < 0.001)
                     {
+                        while(telcount <= 100)
+                        {
+                            telcount++;
+                            float temp = cube["maincube"].y;
+                            cube["maincube"].y = cube["maincube"].y + 0.5;
+                            if(cube["maincube"].y >= 3)
+                            {
+                                cube["maincube"].y = temp;
+                            }
+                            if(telcount < 100)
+                            {
+                                glm::mat4 MVP; // MVP = Projection * View * Model
+                                Matrices.model = glm::mat4(1.0f);
+                                glm::mat4 ObjectTransform;
+                                glm::mat4 translateObject = glm::translate(glm::vec3(cube[current].x, cube[current].y, cube[current].z));    // glTranslatef
+                                glm::mat4 rotateTriangle = glm::rotate((float)((cube[current].anglex) * M_PI / 180.0f), glm::vec3(0, 0, 1)); // rotate about vector (1,0,0)
+                                glm::mat4 rotateTriangle1 = glm::rotate((float)((cube[current].angley) * M_PI / 180.0f), glm::vec3(1, 0, 0));
+                                glm::mat4 rotateTriangle2 = glm::rotate((float)((cube[current].angle) * M_PI / 180.0f), glm::vec3(0, 1, 0)); // rotate about vector (1,0,0)
+
+                                ObjectTransform = translateObject * rotateTriangle * rotateTriangle1 * rotateTriangle2;
+                                Matrices.model *= ObjectTransform;
+                                MVP = VP * Matrices.model; // MVP = p * V * M
+
+                                glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+                                draw3DObject(cube[current].object);
+                            }
+                        }
                         cube["maincube"].x = 3.5;
+                        cube["maincube"].y = -0.15;
                         cube["maincube"].z = 0;
                         flag = 1;
                     }
