@@ -1776,19 +1776,32 @@ void initGL(GLFWwindow *window, int width, int height)
     //right part
     createRectangle("t(3,0)", 3, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(1,-0.5)", 1, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1,-1)", 1, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, yellow);
+    createRectangle("t(1,1)", 1, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(3.5,0)", 3.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(3.5,-0.5)", 3.5, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, yellow);
+    createRectangle("t(3.5,0.5)", 3.5, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, yellow);
+
     createRectangle("t(3,0.5)", 3, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(3,1)", 3, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(3,-0.5)", 3, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(3,-1)", 3, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(2,0.5)", 2, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(1.5,0)", 1.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(2.5,0.5)", 2.5, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, yellow);
+    createRectangle("t(2.5,1)", 2.5, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(1.5,0.5)", 1.5, -0.7, 0.5, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(2.5,-0.5)", 2.5, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, yellow);
+    createRectangle("t(2.5,-1)", 2.5, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(1.5,-0.5)", 1.5, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, yellow);
+    createRectangle("t(1.5,-1)", 1.5, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, black);
+    createRectangle("t(1.5,1)", 1.5, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(2,-0.5)", 2, -0.7, -0.5, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(1,0)", 1, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, yellow);
     createRectangle("t(2,1)", 2, -0.7, 1, 0.5, 0.1, 0.5, "tile", 0, yellow);
+    createRectangle("t(2,1.5)", 2, -0.7, 1.5, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(2,-1)", 2, -0.7, -1, 0.5, 0.1, 0.5, "tile", 0, yellow);
+    createRectangle("t(2,-1.5)", 2, -0.7, -1.5, 0.5, 0.1, 0.5, "tile", 0, black);
     //left part
     createRectangle("t(-1.5,0)", -1.5, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, black);
     createRectangle("t(-1,0)", -1, -0.7, 0, 0.5, 0.1, 0.5, "tile", 0, yellow);
