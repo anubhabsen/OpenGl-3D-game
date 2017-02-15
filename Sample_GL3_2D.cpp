@@ -11,10 +11,10 @@
 #include <ctime>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <ao/ao.h>
-#include <mpg123.h>
+// #include <ao/ao.h>
+// #include <mpg123.h>
 #include <sstream>
-#define BITS 8
+// #define BITS 8
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -1878,38 +1878,38 @@ int main(int argc, char **argv)
     GLFWwindow *window = initGLFW(width, height);
     initGL(window, width, height);
     double last_update_time = glfwGetTime(), current_time;
-    mpg123_handle *mh;
-    unsigned char *buffer;
-    size_t buffer_size;
-    size_t done;
-    int err;
+    // mpg123_handle *mh;
+    // unsigned char *buffer;
+    // size_t buffer_size;
+    // size_t done;
+    // int err;
 
-    int driver;
-    ao_device *dev;
+    // int driver;
+    // ao_device *dev;
 
-    ao_sample_format format;
-    int channels, encoding;
-    long rate;
+    // ao_sample_format format;
+    // int channels, encoding;
+    // long rate;
 
     /* initializations */
-    ao_initialize();
-    driver = ao_default_driver_id();
-    mpg123_init();
-    mh = mpg123_new(NULL, &err);
-    buffer_size = 3000;
-    buffer = (unsigned char *)malloc(buffer_size * sizeof(unsigned char));
+    // ao_initialize();
+    // driver = ao_default_driver_id();
+    // mpg123_init();
+    // mh = mpg123_new(NULL, &err);
+    // buffer_size = 3000;
+    // buffer = (unsigned char *)malloc(buffer_size * sizeof(unsigned char));
 
     /* open the file and get the decoding format */
-    mpg123_open(mh, "arcade.mp3");
-    mpg123_getformat(mh, &rate, &channels, &encoding);
+    // mpg123_open(mh, "arcade.mp3");
+    // mpg123_getformat(mh, &rate, &channels, &encoding);
 
     /* set the output format and open the output device */
-    format.bits = mpg123_encsize(encoding) * BITS;
-    format.rate = rate;
-    format.channels = channels;
-    format.byte_format = AO_FMT_NATIVE;
-    format.matrix = 0;
-    dev = ao_open_live(driver, &format, NULL);
+    // format.bits = mpg123_encsize(encoding) * BITS;
+    // format.rate = rate;
+    // format.channels = channels;
+    // format.byte_format = AO_FMT_NATIVE;
+    // format.matrix = 0;
+    // dev = ao_open_live(driver, &format, NULL);
 
     scoredisp["score1.2"].exists = 0;
     scoredisp["score2.2"].exists = 0;
@@ -1919,15 +1919,21 @@ int main(int argc, char **argv)
     while (!glfwWindowShouldClose(window))
     {
         /* decode and play */
-        if (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK)
-        {
-            ao_play(dev, (char *)buffer, done);
-        }
-        else
-        {
-            mpg123_seek(mh, 0, SEEK_SET);
-        }
+        // if (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK)
+        // {
+        //     ao_play(dev, (char *)buffer, done);
+        // }
+        // else
+        // {
+        //     mpg123_seek(mh, 0, SEEK_SET);
+        // }
         // OpenGL Draw commands
+
+        string str2 = to_string((int)last_update_time);
+        string str3 = to_string(score);
+        string title_string = " TIME: " + str2 + " Moves: " + str3;
+        const char *message = title_string.c_str();
+        glfwSetWindowTitle(window, message);
 
         // clear the color and depth in the frame buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1948,20 +1954,19 @@ int main(int argc, char **argv)
 
         // Control based on time (Time based transformation like 5 degrees rotation every 0.5s)
         current_time = glfwGetTime(); // Time in seconds
-        if ((current_time - last_update_time) >= 5)
+        if ((current_time - last_update_time) >= 1)
         {
             last_update_time = current_time;
-            cout<<"time elapsed: "<<(int)last_update_time<<endl;
         }
     }
 
     /* clean up */
-    free(buffer);
-    ao_close(dev);
-    mpg123_close(mh);
-    mpg123_delete(mh);
-    mpg123_exit();
-    ao_shutdown();
+    // free(buffer);
+    // ao_close(dev);
+    // mpg123_close(mh);
+    // mpg123_delete(mh);
+    // mpg123_exit();
+    // ao_shutdown();
 
     glfwTerminate();
     //    exit(EXIT_SUCCESS);
